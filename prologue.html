@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Prologue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt: #0B3D2E;
+    --felt-deep: #062A20;
+    --panel: #0F4A38;
+    --panel-alt: #145843;
+    --line: #1F6B52;
+    --text: #F3EFE3;
+    --muted: #9FC4B4;
+    --gold: #E8B84B;
+    --gold-bright: #FFD873;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;min-height:100%;}
+  body{
+    background: radial-gradient(ellipse at 50% -10%, #145843 0%, var(--felt) 45%, var(--felt-deep) 100%);
+    min-height:100vh;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #app{max-width:520px;width:100%;padding:32px 24px;text-align:center;}
+
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:1.9rem;margin:0 0 18px;}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+
+  .message-box{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px 26px;
+    margin-bottom:28px;
+    text-align:left;
+  }
+  .message-box p{
+    font-family:'Fraunces',serif;font-size:1.1rem;line-height:1.7;color:var(--text);
+    margin:0 0 14px;
+  }
+  .message-box p:last-child{margin-bottom:0;}
+
+  .begin-btn{
+    font-family:'Space Mono',monospace;font-size:0.8rem;letter-spacing:0.05em;text-transform:uppercase;
+    background:var(--gold);color:var(--felt-deep);border:none;font-weight:700;
+    padding:12px 32px;border-radius:999px;cursor:pointer;
+  }
+  .begin-btn:hover{background:var(--gold-bright);}
+</style>
+</head>
+<body>
+<script src="achievements.js"></script>
+<div id="app">
+  <div class="eyebrow">Puzzles for Patrick</div>
+  <h1>Before we begin...</h1>
+  <div class="message-box">
+    <p>Dear Patrick,</p>
+    <p>You have orchestrated so many joyous moments of play for me to enjoy over the years and I wanted to return the favor for your birthday, even if it's just a fraction of it all. Plus, I did not want to make you eat a horribly dry dessert again (sorry about last year, I loved watching WALL-E together, though).</p>
+    <p>Anyway, I hope you'll like this more than the chocolate bread! I designed and wrote all these puzzles (based on your favorites) by hand, just for you.</p>
+  </div>
+  <button class="begin-btn" onclick="window.location.href='suits-you.html'">Begin →</button>
+</div>
+</body>
+</html>

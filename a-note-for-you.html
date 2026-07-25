@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>The Annual Spell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt: #0B3D2E;
+    --felt-deep: #062A20;
+    --panel: #0F4A38;
+    --panel-alt: #145843;
+    --line: #1F6B52;
+    --text: #F3EFE3;
+    --muted: #9FC4B4;
+    --gold: #E8B84B;
+    --gold-bright: #FFD873;
+    --error: #E37B6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse at 50% -10%, #145843 0%, var(--felt) 45%, var(--felt-deep) 100%);
+    min-height:100vh;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{max-width:640px;margin:0 auto;min-height:100vh;padding:0 0 60px;}
+
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);}
+
+  .header{padding:28px 22px 10px;text-align:center;}
+  .header h1{font-size:1.8rem;margin-bottom:6px;}
+  .header .sub{color:var(--muted);font-size:0.85rem;line-height:1.5;max-width:440px;margin:0 auto;}
+
+  .progress-dots{display:flex;justify-content:center;gap:8px;padding:16px 0 4px;}
+  .progress-dot{
+    width:9px;height:9px;border-radius:50%;background:var(--line);
+    transition:background 0.3s ease;
+  }
+  .progress-dot.done{background:var(--gold-bright);}
+  .progress-dot.active{background:var(--gold);}
+
+  .puzzle-section{padding:18px 20px;}
+
+  .solved-line{
+    text-align:center;padding:14px 18px;
+    font-family:'Fraunces',serif;font-size:1.15rem;color:var(--gold-bright);
+    line-height:1.5;
+  }
+
+  .bank-wrap{display:flex;justify-content:center;overflow-x:auto;padding-bottom:6px;}
+  .bank-grid{display:grid;gap:3px;}
+  .bank-col{
+    display:flex;flex-direction:column-reverse;gap:4px;align-items:center;justify-content:flex-start;min-height:40px;
+    box-shadow:1.5px 0 0 var(--line);
+  }
+  .bank-col:last-child{box-shadow:none;}
+  .bank-tile{
+    width:23px;height:23px;border-radius:5px;
+    background:var(--panel-alt);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:0.78rem;color:var(--gold-bright);
+    cursor:pointer;user-select:none;flex-shrink:0;
+    transition:transform 0.1s ease, background 0.1s ease;
+  }
+  .bank-tile:hover{background:rgba(255,216,115,0.18);transform:translateY(-1px);}
+  .bank-tile.dimmed{opacity:0.3;pointer-events:none;}
+
+  .grid-wrap{display:flex;justify-content:center;padding:10px 0;overflow-x:auto;}
+  .puzzle-grid{display:grid;gap:3px;background:var(--line);border:3px solid var(--gold);border-radius:6px;padding:3px;}
+  .cell{
+    width:28px;height:28px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:0.85rem;
+    border-radius:3px;cursor:pointer;flex-shrink:0;
+  }
+  .cell.black{background:var(--felt-deep);cursor:default;}
+  .cell.fixed{background:var(--panel);color:var(--muted);cursor:default;}
+  .cell.heart{color:var(--error);font-size:1rem;text-shadow:0 0 8px rgba(227,123,107,0.5);}
+  .cell.final-row{border-top:3px solid var(--gold);position:relative;}
+  .cell.final-row.letter{background:rgba(255,216,115,0.14);}
+  .cell.final-row.letter.filled{color:var(--gold-bright);text-shadow:0 0 6px rgba(255,216,115,0.4);}
+  .cell.final-row.black{background:var(--felt-deep);}
+  .cell.final-row.fixed{background:rgba(255,216,115,0.08);}
+  .cell.letter{background:var(--panel);color:var(--text);}
+  .cell.letter.filled{color:var(--gold-bright);}
+  .cell.letter.selected{background:rgba(255,216,115,0.3);outline:2px solid var(--gold-bright);}
+  .cell.wrong{color:var(--error) !important;}
+  .cell.locked{cursor:default;box-shadow:inset 0 0 0 1px rgba(255,216,115,0.35);}
+  .falling-heart{
+    position:absolute;top:-10px;font-size:0.9rem;color:var(--gold-bright);
+    animation:heartFall 1.4s ease-in forwards;
+    opacity:0.9;
+  }
+  @keyframes heartFall{
+    0%{top:-10px;opacity:0.9;transform:rotate(0deg);}
+    100%{top:40px;opacity:0;transform:rotate(25deg);}
+  }
+
+  .status-note{
+    text-align:center;font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);
+    padding:8px 22px 0;
+  }
+
+  .win-banner{
+    text-align:center;padding:26px 22px;
+  }
+  .win-banner h2{color:var(--gold-bright);font-size:1.6rem;margin-bottom:8px;text-shadow:0 0 20px rgba(255,216,115,0.4);}
+  .win-banner p{color:var(--muted);font-family:'Space Mono',monospace;font-size:0.85rem;line-height:1.6;}
+
+  .dev-buttons{text-align:center;padding-top:18px;}
+  .dev-buttons button{
+    font-family:'Space Mono',monospace;font-size:0.7rem;background:none;border:1px dashed var(--muted);
+    color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;margin:0 4px;
+  }
+</style>
+</head>
+<body>
+<script src="achievements.js"></script>
+<div id="app"></div>
+
+<script>
+const PUZZLES = [
+  {"width": 19, "rows": 5, "types": [["letter", "letter", "letter", "letter", "fixed", "letter", "black", "letter", "letter", "letter", "black", "letter", "black", "letter", "letter", "letter", "fixed", "black", "letter"], ["black", "letter", "letter", "letter", "letter", "black", "letter", "letter", "letter", "black", "letter", "letter", "letter", "letter", "letter", "letter", "letter", "fixed", "black"], ["letter", "black", "letter", "letter", "letter", "letter", "black", "letter", "letter", "letter", "black", "fixed", "letter", "letter", "letter", "letter", "letter", "letter", "letter"], ["black", "letter", "letter", "letter", "letter", "letter", "letter", "letter", "black", "letter", "letter", "letter", "letter", "letter", "black", "letter", "letter", "letter", "letter"], ["letter", "letter", "letter", "letter", "letter", "black", "letter", "letter", "letter", "letter", "letter", "letter", "letter", "letter", "black", "letter", "letter", "letter", "fixed"]], "solution": [["T", "H", "A", "T", "'", "S", null, "A", "L", "L", null, "I", null, "G", "O", "T", "!", null, "I"], [null, "H", "O", "P", "E", null, "Y", "O", "U", null, "E", "N", "J", "O", "Y", "E", "D", ".", null], ["I", null, "L", "O", "V", "E", null, "Y", "O", "U", null, "-", "N", "O", "T", "H", "I", "N", "G"], [null, "C", "R", "Y", "P", "T", "I", "C", null, "A", "B", "O", "U", "T", null, "T", "H", "A", "T"], ["H", "A", "P", "P", "Y", null, "B", "I", "R", "T", "H", "D", "A", "Y", null, "P", "A", "T", "♥"]], "banks": [["I", "T", "H"], ["A", "H", "C", "H"], ["R", "L", "A", "P", "O"], ["Y", "P", "O", "T", "P"], ["V", "P", "Y", "E"], ["E", "T", "S"], ["I", "Y", "B"], ["A", "C", "Y", "O", "I"], ["L", "O", "R", "U"], ["A", "U", "T", "L"], ["E", "H", "B"], ["O", "D", "I", "N"], ["U", "N", "A", "J"], ["Y", "T", "O", "O", "G"], ["T", "Y", "O"], ["H", "T", "E", "T", "P"], ["D", "I", "A", "H"], ["A", "N", "T"], ["G", "I", "T"]]}
+];
+
+let currentPuzzleIndex = 0;
+let userGrids = PUZZLES.map(p => p.types.map(row => row.map(t => t === 'letter' ? '' : null)));
+let remainingBanks = PUZZLES.map(p => p.banks.map(col => col.slice()));
+let selected = null; // {r, c}
+let wrongFlash = false;
+let wrongCells = new Set(); // "r,c" keys currently flagged by the Check button
+let lockedCells = new Set(); // "r,c" keys confirmed correct by Validate — immune to removal
+let extraValidateClicks = 0;
+let validateLocked = false;
+let easterEggMessage = null;
+
+function devFillSolution(){
+  const p = PUZZLES[currentPuzzleIndex];
+  userGrids[currentPuzzleIndex] = p.solution.map(row => row.map(v => v === null ? null : v));
+  remainingBanks[currentPuzzleIndex] = p.banks.map(() => []);
+  render();
+}
+function devReset(){
+  const p = PUZZLES[currentPuzzleIndex];
+  userGrids[currentPuzzleIndex] = p.types.map(row => row.map(t => t === 'letter' ? '' : null));
+  remainingBanks[currentPuzzleIndex] = p.banks.map(col => col.slice());
+  selected = null;
+  wrongCells.clear();
+  lockedCells.clear();
+  extraValidateClicks = 0;
+  easterEggMessage = null;
+  validateLocked = false;
+  render();
+}
+
+function isPuzzleFull(idx){
+  const p = PUZZLES[idx];
+  const g = userGrids[idx];
+  for (let r=0;r<p.rows;r++){
+    for (let c=0;c<p.width;c++){
+      if (p.types[r][c] === 'letter' && !g[r][c]) return false;
+    }
+  }
+  return true;
+}
+
+function isPuzzleCorrect(idx){
+  const p = PUZZLES[idx];
+  const g = userGrids[idx];
+  for (let r=0;r<p.rows;r++){
+    for (let c=0;c<p.width;c++){
+      if (p.types[r][c] === 'letter' && g[r][c] !== p.solution[r][c]) return false;
+    }
+  }
+  return true;
+}
+
+function solvedSentenceText(idx){
+  const p = PUZZLES[idx];
+  let out = '';
+  for (let r=0;r<p.rows;r++){
+    for (let c=0;c<p.width;c++){
+      const t = p.types[r][c];
+      if (t === 'black') out += ' ';
+      else out += p.solution[r][c];
+    }
+  }
+  return out.trim().replace(/\s+/g, ' ');
+}
+
+function selectCell(idx, r, c){
+  if (idx !== currentPuzzleIndex) return;
+  const p = PUZZLES[idx];
+  if (p.types[r][c] !== 'letter') return;
+  const g = userGrids[idx];
+  if (g[r][c]){
+    if (lockedCells.has(r+','+c)){
+      // confirmed correct — just select it, don't allow removal
+      selected = {r, c};
+      render();
+      return;
+    }
+    // pick the letter back up
+    remainingBanks[idx][c].push(g[r][c]);
+    g[r][c] = '';
+    selected = {r, c};
+    wrongCells.clear();
+    render();
+    return;
+  }
+  selected = {r, c};
+  render();
+}
+
+function checkPlacement(){
+  if (validateLocked) return;
+  const idx = currentPuzzleIndex;
+  const p = PUZZLES[idx];
+  const g = userGrids[idx];
+
+  if (isPuzzleFull(idx) && isPuzzleCorrect(idx)){
+    extraValidateClicks++;
+    const messages = [
+      "It's right. I promise.",
+      "Still right. Really, that's all I got.",
+      "I'm going to lock this button now Patrick."
+    ];
+    easterEggMessage = messages[Math.min(extraValidateClicks - 1, messages.length - 1)];
+    if (extraValidateClicks >= 3) validateLocked = true;
+    render();
+    setTimeout(() => { easterEggMessage = null; render(); }, 2200);
+    return;
+  }
+
+  wrongCells.clear();
+  const toClear = [];
+  for (let r=0;r<p.rows;r++){
+    for (let c=0;c<p.width;c++){
+      if (p.types[r][c] !== 'letter' || !g[r][c]) continue;
+      if (g[r][c] !== p.solution[r][c]){
+        wrongCells.add(r+','+c);
+        toClear.push({r, c});
+      } else {
+        lockedCells.add(r+','+c);
+      }
+    }
+  }
+  render();
+  if (toClear.length){
+    setTimeout(() => {
+      for (const {r, c} of toClear){
+        remainingBanks[idx][c].push(g[r][c]);
+        g[r][c] = '';
+      }
+      wrongCells.clear();
+      render();
+    }, 600);
+  }
+}
+
+function findNextEmptyCell(idx, afterR, afterC){
+  const p = PUZZLES[idx];
+  const g = userGrids[idx];
+  let found = false;
+  for (let r=0;r<p.rows;r++){
+    for (let c=0;c<p.width;c++){
+      if (!found){
+        if (r === afterR && c === afterC) found = true;
+        continue;
+      }
+      if (p.types[r][c] === 'letter' && !g[r][c]) return {r, c};
+    }
+  }
+  // wrap around
+  for (let r=0;r<p.rows;r++){
+    for (let c=0;c<p.width;c++){
+      if (p.types[r][c] === 'letter' && !g[r][c]) return {r, c};
+    }
+  }
+  return null;
+}
+
+function findPrevLetterCell(idx, beforeR, beforeC){
+  const p = PUZZLES[idx];
+  // walk backward through the whole grid in reading order
+  const all = [];
+  for (let r=0;r<p.rows;r++){
+    for (let c=0;c<p.width;c++){
+      if (p.types[r][c] === 'letter') all.push({r, c});
+    }
+  }
+  const idxInList = all.findIndex(cell => cell.r === beforeR && cell.c === beforeC);
+  if (idxInList <= 0) return null;
+  return all[idxInList - 1];
+}
+
+function moveSelection(idx, dr, dc){
+  const p = PUZZLES[idx];
+  if (!selected) return;
+  let r = selected.r, c = selected.c;
+  while (true){
+    r += dr; c += dc;
+    if (r < 0 || r >= p.rows || c < 0 || c >= p.width) return; // hit the edge, stay put
+    if (p.types[r][c] === 'letter'){
+      selected = {r, c};
+      render();
+      return;
+    }
+  }
+}
+
+function placeLetterFromBank(idx, col, letter){
+  if (idx !== currentPuzzleIndex) return;
+  if (!selected) return;
+  const {r, c} = selected;
+  if (c !== col) return;
+  const p = PUZZLES[idx];
+  if (p.types[r][c] !== 'letter') return;
+  const g = userGrids[idx];
+  if (g[r][c]) return; // already filled, must clear first
+
+  const bank = remainingBanks[idx][col];
+  const pos = bank.indexOf(letter);
+  if (pos === -1) return;
+  bank.splice(pos, 1);
+  g[r][c] = letter;
+  wrongCells.clear();
+
+  const next = findNextEmptyCell(idx, r, c);
+  selected = next;
+
+  render();
+
+  if (isPuzzleFull(idx)){
+    if (isPuzzleCorrect(idx)){
+      setTimeout(() => {
+        if (currentPuzzleIndex < PUZZLES.length - 1){
+          currentPuzzleIndex++;
+          selected = null;
+        }
+        render();
+      }, 700);
+    } else {
+      wrongFlash = true;
+      render();
+      setTimeout(() => { wrongFlash = false; render(); }, 500);
+    }
+  }
+}
+
+function onKeyDown(event){
+  if (!selected) return;
+  const idx = currentPuzzleIndex;
+  const {r, c} = selected;
+
+  if (event.key === 'Backspace'){
+    event.preventDefault();
+    const p = PUZZLES[idx];
+    const g = userGrids[idx];
+    if (g[r][c]){
+      if (!lockedCells.has(r+','+c)){
+        remainingBanks[idx][c].push(g[r][c]);
+        g[r][c] = '';
+        wrongCells.clear();
+        render();
+      } else {
+        // already validated — behave like left-arrow instead of doing nothing
+        const prevLocked = findPrevLetterCell(idx, r, c);
+        if (prevLocked){
+          selected = prevLocked;
+          render();
+        }
+      }
+    } else {
+      // current square is already blank — step back (wrapping across rows if needed)
+      // and clear the previous one, unless it's already validated
+      const prev = findPrevLetterCell(idx, r, c);
+      if (prev && g[prev.r][prev.c] && !lockedCells.has(prev.r+','+prev.c)){
+        remainingBanks[idx][prev.c].push(g[prev.r][prev.c]);
+        g[prev.r][prev.c] = '';
+        wrongCells.clear();
+        selected = prev;
+        render();
+      } else if (prev){
+        selected = prev;
+        render();
+      }
+    }
+    return;
+  }
+
+  if (event.key === 'ArrowRight'){ event.preventDefault(); moveSelection(idx, 0, 1); return; }
+  if (event.key === 'ArrowLeft'){ event.preventDefault(); moveSelection(idx, 0, -1); return; }
+  if (event.key === 'ArrowDown'){ event.preventDefault(); moveSelection(idx, 1, 0); return; }
+  if (event.key === 'ArrowUp'){ event.preventDefault(); moveSelection(idx, -1, 0); return; }
+
+  const key = event.key.toUpperCase();
+  if (key.length === 1 && key >= 'A' && key <= 'Z'){
+    placeLetterFromBank(idx, selected.c, key);
+  }
+}
+
+function render(){
+  const app = document.getElementById('app');
+
+  let sectionsHtml = '';
+  for (let idx = 0; idx <= currentPuzzleIndex; idx++){
+    const p = PUZZLES[idx];
+    if (idx < currentPuzzleIndex){
+      sectionsHtml += `<div class="puzzle-section"><div class="solved-line">${solvedSentenceText(idx)}</div></div>`;
+      continue;
+    }
+
+    // active puzzle
+    const bank = remainingBanks[idx];
+    const maxBankLen = Math.max(...bank.map(b => b.length), 1);
+
+    let bankColsHtml = '';
+    for (let c=0;c<p.width;c++){
+      let tilesHtml = bank[c].map(letter =>
+        `<div class="bank-tile" onclick="placeLetterFromBank(${idx},${c},'${letter}')">${letter}</div>`
+      ).join('');
+      bankColsHtml += `<div class="bank-col" style="min-height:${maxBankLen*27}px;">${tilesHtml}</div>`;
+    }
+
+    let gridHtml = '';
+    for (let r=0;r<p.rows;r++){
+      for (let c=0;c<p.width;c++){
+        const t = p.types[r][c];
+        const val = userGrids[idx][r][c];
+        const isSel = selected && selected.r === r && selected.c === c;
+        let classes = ['cell', t];
+        if (t === 'letter' && val) classes.push('filled');
+        if (isSel) classes.push('selected');
+        if (wrongFlash && t === 'letter' && val) classes.push('wrong');
+        if (wrongCells.has(r+','+c)) classes.push('wrong');
+        if (t === 'fixed' && p.solution[r][c] === '♥') classes.push('heart');
+        if (r === p.rows - 1) classes.push('final-row');
+        if (lockedCells.has(r+','+c)) classes.push('locked');
+        const display = t === 'black' ? '' : (t === 'fixed' ? p.solution[r][c] : (val || ''));
+        const gridRowNum = (r === p.rows - 1) ? r + 2 : r + 1;
+        gridHtml += `<div class="${classes.join(' ')}" style="grid-row:${gridRowNum};grid-column:${c+1};" onclick="selectCell(${idx},${r},${c})">${display}</div>`;
+      }
+    }
+
+    sectionsHtml += `
+      <div class="puzzle-section">
+        <div class="bank-wrap">
+          <div class="bank-grid" style="grid-template-columns:repeat(${p.width}, 28px);">${bankColsHtml}</div>
+        </div>
+        <div class="grid-wrap">
+          <div class="puzzle-grid" style="grid-template-columns:repeat(${p.width}, 28px);grid-template-rows:repeat(${p.rows - 1}, 28px) 10px 28px;">${gridHtml}</div>
+        </div>
+        <div style="text-align:center;padding-top:10px;">
+          <button onclick="checkPlacement()" ${validateLocked ? 'disabled' : ''} style="font-family:'Space Mono',monospace;font-size:0.7rem;background:none;border:1px solid var(--line);color:var(--muted);padding:6px 14px;border-radius:999px;cursor:${validateLocked ? 'default' : 'pointer'};${validateLocked ? 'opacity:0.5;' : ''}">${validateLocked ? 'Validated' : 'Validate letters'}</button>
+        </div>
+        ${easterEggMessage ? `
+          <div style="position:relative;text-align:center;padding-top:14px;overflow:hidden;height:40px;">
+            ${['12%','28%','45%','62%','78%','90%'].map((left,i) =>
+              `<div class="falling-heart" style="left:${left};animation-delay:${(i*0.12).toFixed(2)}s;">❤</div>`
+            ).join('')}
+            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;color:var(--gold-bright);position:relative;z-index:2;">${easterEggMessage}</div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  const allDone = currentPuzzleIndex === PUZZLES.length - 1 && isPuzzleFull(currentPuzzleIndex) && isPuzzleCorrect(currentPuzzleIndex);
+
+  const winHtml = allDone ? `
+    <div class="win-banner">
+      <h2>❤</h2>
+    </div>
+  ` : '';
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="eyebrow">Puzzles for Patrick</div>
+      <h1>The Annual Spell</h1>
+      <div class="sub">Thursday, July 30</div>
+    </div>
+
+    ${sectionsHtml}
+    ${winHtml}
+    <div class="dev-buttons">
+      <button onclick="devFillSolution()">DEV: Fill Solution (remove before gifting)</button>
+      <button onclick="devReset()">DEV: Reset (remove before gifting)</button>
+    </div>
+  `;
+}
+
+document.addEventListener('keydown', onKeyDown);
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Hehe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt: #0B3D2E;
+    --felt-deep: #062A20;
+    --panel: #0F4A38;
+    --panel-alt: #145843;
+    --line: #1F6B52;
+    --text: #F3EFE3;
+    --muted: #9FC4B4;
+    --gold: #E8B84B;
+    --gold-bright: #FFD873;
+    --error: #E37B6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse at 50% -10%, #145843 0%, var(--felt) 45%, var(--felt-deep) 100%);
+    min-height:100vh;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{max-width:520px;margin:0 auto;min-height:100vh;padding:0 0 60px;}
+
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);}
+
+  .header{padding:32px 22px 14px;text-align:center;}
+  .header h1{font-size:2rem;margin-bottom:8px;}
+  .header .sub{color:var(--muted);font-size:0.9rem;line-height:1.5;max-width:420px;margin:0 auto;}
+
+  .clue-list{padding:10px 22px;display:flex;flex-direction:column;}
+  .clue-row{display:flex;flex-direction:column;}
+
+  .clue-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:14px 16px;transition:border-color 0.2s ease, background 0.2s ease;
+    display:flex;align-items:center;gap:12px;
+  }
+  .clue-card.solved{border-color:var(--gold);background:linear-gradient(145deg,#16513e,#0F4A38);}
+  .clue-card.new{animation:popIn 0.4s ease;}
+  @keyframes popIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+
+  .clue-main{flex:1;min-width:0;}
+  .clue-text{font-size:0.9rem;color:var(--text);margin-bottom:8px;line-height:1.4;}
+  .hint-btn{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.05em;
+    padding:4px 10px;border-radius:999px;cursor:pointer;margin-bottom:8px;
+  }
+  .hint-btn:hover{border-color:var(--gold);color:var(--gold-bright);}
+  .hint-yellow{color:#FFE066;font-weight:700;background:rgba(255,224,102,0.12);border-radius:3px;padding:0 3px;}
+  .hint-pink{color:#FF7FB4;font-weight:700;background:rgba(255,127,180,0.12);border-radius:3px;padding:0 3px;}
+  .hint-blue{color:#7EC8E3;font-weight:700;background:rgba(126,200,227,0.14);border-radius:3px;padding:0 3px;}
+  .answer-row{display:flex;gap:8px;align-items:center;}
+  .tile-input{
+    flex:1;font-family:'Space Mono',monospace;font-size:1.1rem;letter-spacing:0.35em;
+    text-transform:uppercase;background:transparent;border:none;border-bottom:2px solid var(--line);
+    color:var(--text);padding:4px 2px;outline:none;
+  }
+  .tile-input:focus{border-color:var(--gold);}
+  .clue-card.solved .tile-input{border-color:var(--gold);color:var(--gold-bright);pointer-events:none;font-size:1.3rem;letter-spacing:0.4em;}
+  .check-icon{font-family:'Space Mono',monospace;color:var(--gold-bright);font-size:1rem;width:18px;text-align:center;flex-shrink:0;}
+  .shake{animation:shake 0.35s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+  .drag-handle{
+    width:26px;height:100%;min-height:36px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:1.1rem;letter-spacing:2px;
+    cursor:grab;touch-action:none;user-select:none;
+    border-radius:6px;
+  }
+  .drag-handle:hover{color:var(--gold-bright);background:rgba(255,216,115,0.08);}
+  .clue-row.dragging{position:relative;z-index:50;}
+  .clue-row.dragging .clue-card{box-shadow:0 12px 28px rgba(0,0,0,0.5);border-color:var(--gold-bright);cursor:grabbing;}
+  .clue-row{transition:transform 0.15s ease;}
+  .clue-row.drop-before{border-top:2px solid var(--gold-bright);}
+  .clue-row.drop-after{border-bottom:2px solid var(--gold-bright);}
+
+  .connector{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:5px 0;font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--muted);
+  }
+  .connector .line{width:2px;height:14px;background:var(--line);}
+  .connector.match .line{background:var(--gold-bright);}
+  .connector.match{color:var(--gold-bright);}
+
+  .status-note{
+    text-align:center;color:var(--gold-bright);font-family:'Space Mono',monospace;font-size:0.78rem;
+    margin:6px 22px 10px;
+  }
+
+  .win-banner{
+    text-align:center;padding:24px 22px;
+  }
+  .win-banner h2{color:var(--gold-bright);font-size:1.5rem;margin-bottom:6px;text-shadow:0 0 20px rgba(255,216,115,0.4);}
+  .win-banner p{color:var(--muted);font-family:'Space Mono',monospace;font-size:0.85rem;margin-bottom:4px;}
+  .win-banner .small-note{font-size:0.7rem;opacity:0.75;margin-top:6px;font-style:italic;}
+
+  @media (max-width:400px){ .header h1{font-size:1.6rem;} }
+</style>
+</head>
+<body>
+<script src="achievements.js"></script>
+<div id="app"></div>
+
+<script>
+const WORDS = {
+  shale: {
+    word: "SHALE",
+    clue: "Oh no! My leash tore.. who knew it had a tendency to split so thin? (5)",
+    hintHtml: "Oh no! My <span class=\"hint-yellow\">leash</span> <span class=\"hint-pink\">tore</span>.. who knew it had a <span class=\"hint-blue\">tendency to split so thin</span>? (5)"
+  },
+  share: {
+    word: "SHARE",
+    clue: "My my, 2% of the company? What a big feat for a small jack! (5)",
+    hintHtml: "My my, <span class=\"hint-blue\">2% of the company</span>? What a big feat for a <span class=\"hint-yellow\">small jack</span>! (5)"
+  },
+  stare: {
+    word: "STARE",
+    clue: "A silly rat stuck in sauce, eyes wide and unblinking (5)",
+    hintHtml: "A <span class=\"hint-pink\">silly</span> <span class=\"hint-yellow\">rat</span> <span class=\"hint-pink\">stuck in</span> <span class=\"hint-yellow\">sauce</span>, <span class=\"hint-blue\">eyes wide and unblinking</span> (5)"
+  },
+  stark: {
+    word: "STARK",
+    clue: "Muddled measurements of gold purity with alloy initially removed bare (5)",
+    hintHtml: "<span class=\"hint-pink\">Muddled</span> <span class=\"hint-yellow\">measurements of gold purity</span> with <span class=\"hint-yellow\">alloy</span> <span class=\"hint-pink\">initially removed</span> <span class=\"hint-blue\">bare</span> (5)"
+  },
+  whale: { word: "WHALE", clue: "The beginning to most questions with a robust and healthy curiosity makes for big tales to tell and beautiful sights to see (5)" },
+  shark: { word: "SHARK", clue: "Small and commanding attention, she is quick to deceive for the upper hand (5)" }
+};
+
+let state = {
+  order: ["stark", "shale", "stare", "share"],
+  solved: {},
+  bonusRevealed: false,
+  stage1WasComplete: false,
+  justAdded: [],
+  hintsShown: {}
+};
+
+function diffCount(a,b){
+  if (a.length !== b.length) return 99;
+  let d = 0;
+  for (let i=0;i<a.length;i++) if (a[i]!==b[i]) d++;
+  return d;
+}
+
+function checkAnswer(id){
+  const wordObj = WORDS[id];
+  const row = document.getElementById(`card-${id}`);
+  const input = row.querySelector('.tile-input');
+  const val = input.value.trim().toUpperCase();
+  if (val === wordObj.word){
+    state.solved[id] = true;
+    render();
+  } else {
+    row.classList.add('shake');
+    setTimeout(() => row.classList.remove('shake'), 350);
+  }
+}
+
+function toggleHint(id){
+  state.hintsShown[id] = !state.hintsShown[id];
+  render();
+}
+
+let dragState = null;
+
+function onDragStart(ev, id){
+  ev.preventDefault();
+  const rowEl = document.getElementById(`row-${id}`);
+  const solvedIds = state.order.filter(x => state.solved[x]);
+  const snapshot = solvedIds.map(sid => {
+    const el = document.getElementById(`row-${sid}`);
+    const r = el.getBoundingClientRect();
+    return { id: sid, top: r.top, height: r.height, centerY: r.top + r.height/2 };
+  });
+  dragState = {
+    id, rowEl,
+    startY: ev.clientY,
+    startRect: rowEl.getBoundingClientRect(),
+    snapshot,
+    targetIndex: solvedIds.indexOf(id)
+  };
+  rowEl.classList.add('dragging');
+  ev.target.setPointerCapture(ev.pointerId);
+  document.addEventListener('pointermove', onDragMove);
+  document.addEventListener('pointerup', onDragEnd);
+}
+
+function onDragMove(ev){
+  if (!dragState) return;
+  const dy = ev.clientY - dragState.startY;
+  dragState.rowEl.style.transform = `translateY(${dy}px)`;
+
+  const draggedCenter = dragState.startRect.top + dragState.startRect.height/2 + dy;
+  const others = dragState.snapshot.filter(s => s.id !== dragState.id);
+  let newIndex = 0;
+  for (const s of others){
+    if (draggedCenter > s.centerY) newIndex++;
+  }
+  dragState.targetIndex = newIndex;
+
+  // visual drop-line indicator
+  document.querySelectorAll('.clue-row').forEach(el => el.classList.remove('drop-before','drop-after'));
+  if (others.length > 0){
+    const clampedIndex = Math.max(0, Math.min(newIndex, others.length));
+    if (clampedIndex < others.length){
+      const targetEl = document.getElementById(`row-${others[clampedIndex].id}`);
+      if (targetEl) targetEl.classList.add('drop-before');
+    } else {
+      const targetEl = document.getElementById(`row-${others[others.length-1].id}`);
+      if (targetEl) targetEl.classList.add('drop-after');
+    }
+  }
+}
+
+function onDragEnd(){
+  if (!dragState) return;
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+  document.querySelectorAll('.clue-row').forEach(el => el.classList.remove('drop-before','drop-after','dragging'));
+
+  const solvedIds = state.order.filter(x => state.solved[x]);
+  const unsolvedTail = state.order.filter(x => !state.solved[x]);
+  const withoutDragged = solvedIds.filter(x => x !== dragState.id);
+  const idx = Math.max(0, Math.min(dragState.targetIndex, withoutDragged.length));
+  withoutDragged.splice(idx, 0, dragState.id);
+  state.order = [...withoutDragged, ...unsolvedTail];
+
+  dragState = null;
+  render();
+}
+
+function allSolvedIn(ids){
+  return ids.every(id => state.solved[id]);
+}
+
+function fullChainValid(ids, order){
+  const seq = order.filter(id => ids.includes(id)).map(id => WORDS[id].word);
+  if (seq.length !== ids.length) return false;
+  for (let i=0;i<seq.length-1;i++){
+    if (diffCount(seq[i], seq[i+1]) !== 1) return false;
+  }
+  return true;
+}
+
+function render(){
+  const app = document.getElementById('app');
+
+  const baseIds = ["shale","share","stare","stark"];
+  const bonusIds = ["whale","shark"];
+
+  const baseSolved = allSolvedIn(baseIds);
+  const stage1Complete = baseSolved && fullChainValid(baseIds, state.order);
+
+  if (stage1Complete && !state.bonusRevealed){
+    state.bonusRevealed = true;
+    // SHALE and STARK are always the two ends of the valid chain (never in the middle).
+    // Whichever end each sits on, its bonus word extends outward from that same end.
+    if (state.order[0] === "shale"){
+      state.order = ["whale", ...state.order, "shark"];
+    } else {
+      // state.order[0] === "stark"
+      state.order = ["shark", ...state.order, "whale"];
+    }
+    state.justAdded = ["whale","shark"];
+  }
+
+  const bonusSolved = state.bonusRevealed && allSolvedIn(bonusIds);
+  const allIds = state.bonusRevealed ? [...baseIds, ...bonusIds] : baseIds;
+  const stage2Complete = state.bonusRevealed && bonusSolved && fullChainValid(allIds, state.order);
+
+  let rowsHtml = '';
+  for (let i=0; i<state.order.length; i++){
+    const id = state.order[i];
+    const w = WORDS[id];
+    const isSolved = state.solved[id];
+    const isNew = state.justAdded.includes(id) && !isSolved;
+    const placeholder = Array(w.word.length).fill('_').join(' ');
+
+    rowsHtml += `
+      <div class="clue-row" id="row-${id}">
+        <div class="clue-card ${isSolved ? 'solved' : ''} ${isNew ? 'new' : ''}" id="card-${id}">
+          ${isSolved ? `
+            <div class="drag-handle" onpointerdown="onDragStart(event, '${id}')">⋮⋮</div>
+          ` : `<div class="drag-handle" style="visibility:hidden;">⋮⋮</div>`}
+          <div class="clue-main">
+            <div class="clue-text">${(!isSolved && state.hintsShown[id] && w.hintHtml) ? w.hintHtml : w.clue}</div>
+            ${(!isSolved && w.hintHtml) ? `<button class="hint-btn" onclick="toggleHint('${id}')">${state.hintsShown[id] ? 'Hide hint' : 'Show hint'}</button>` : ''}
+            <div class="answer-row">
+              <input class="tile-input" maxlength="${w.word.length}" placeholder="${placeholder}"
+                value="${isSolved ? w.word : ''}"
+                ${isSolved ? 'disabled' : ''}
+                oninput="this.value=this.value.toUpperCase()"
+                onkeydown="if(event.key==='Enter'){checkAnswer('${id}')}">
+            </div>
+          </div>
+          <span class="check-icon">${isSolved ? '✓' : ''}</span>
+        </div>
+      </div>
+    `;
+
+    // connector to next card, only shown when both this and next are solved
+    if (i < state.order.length - 1){
+      const nextId = state.order[i+1];
+      if (isSolved && state.solved[nextId]){
+        const match = diffCount(w.word, WORDS[nextId].word) === 1;
+        rowsHtml += `<div class="connector ${match ? 'match' : ''}"><div class="line"></div>${match ? '1 letter' : '—'}<div class="line"></div></div>`;
+      } else {
+        rowsHtml += `<div class="connector"><div class="line"></div><div class="line"></div></div>`;
+      }
+    }
+  }
+
+  let note = '';
+  if (state.bonusRevealed && !stage2Complete){
+    if (!bonusSolved){
+      note = "Oh?";
+    } else {
+      note = "All six are solved. Reorder them into one continuous climb.";
+    }
+  } else if (!stage1Complete && baseSolved){
+    note = "Of course I'd put a Crossclimb in here :-)";
+  }
+
+  const winHtml = stage2Complete ? `
+    <div class="win-banner">
+      <h2>Surprise! Animal Fact!</h2>
+      <p>Whale sharks don't have eyelids - instead, they have tiny teeth on their eyeballs known as dermal denticles (up to 3,000 per eye) to prevent scratching and abrasions. They are the only type of shark to have armored eyeballs!</p>
+      <p class="small-note">And if you ever try to sell this fact back to me for my channel points one day... trust that I will know..... and yes, I will laugh first.... and then ask for another fact LOL</p>
+      <div style="margin-top:10px;">
+        <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--muted);text-decoration:underline;">← Back to puzzles</a>
+        &nbsp;&nbsp;
+        <a href="a-long-time-ago.html" style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--gold-bright);text-decoration:underline;">Next puzzle set →</a>
+      </div>
+    </div>
+  ` : '';
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="eyebrow">Puzzles for Patrick</div>
+      <h1>Hehe</h1>
+      <div class="sub">More puzzles, more fun! We're not done!</div>
+      <a href="digit-ladder.html" style="display:inline-block;margin-top:10px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-decoration:underline;">← Previous puzzle set</a>
+      <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+          <a href="suits-you.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">1 Suits</a>
+          <a href="hollow-knight.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">2 Hollow</a>
+          <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">3 Sudoku</a>
+          <a href="open-water.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">4 Water</a>
+          <a href="a-long-time-ago.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">5 Wars</a>
+          <a href="discovery.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">6 Disc</a>
+          <a href="crossword.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">7 X-word</a>
+        </div>
+      </div>
+    </div>
+    ${note ? `<div class="status-note">${note}</div>` : ''}
+    <div class="clue-list">${rowsHtml}</div>
+    ${winHtml}
+  `;
+
+  state.justAdded = [];
+
+  // wire blur-to-check
+  state.order.forEach(id => {
+    if (!state.solved[id]){
+      const input = document.querySelector(`#card-${id} .tile-input`);
+      if (input){
+        input.addEventListener('blur', () => {
+          if (input.value.trim().length === WORDS[id].word.length) checkAnswer(id);
+        });
+      }
+    }
+  });
+}
+
+render();
+</script>
+</body>
+</html>

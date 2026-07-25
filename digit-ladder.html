@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Digit Ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt: #0B3D2E;
+    --felt-deep: #062A20;
+    --panel: #0F4A38;
+    --panel-alt: #145843;
+    --line: #1F6B52;
+    --text: #F3EFE3;
+    --muted: #9FC4B4;
+    --gold: #E8B84B;
+    --gold-bright: #FFD873;
+    --error: #E37B6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse at 50% -10%, #145843 0%, var(--felt) 45%, var(--felt-deep) 100%);
+    min-height:100vh;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{max-width:560px;margin:0 auto;min-height:100vh;padding:0 0 60px;}
+
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);}
+
+  .header{padding:32px 22px 14px;text-align:center;}
+  .header h1{font-size:2rem;margin-bottom:8px;}
+  .header .sub{color:var(--muted);font-size:0.9rem;line-height:1.5;max-width:420px;margin:0 auto;}
+
+  .board-wrap{padding:18px 14px 6px;display:flex;justify-content:center;}
+  .board{
+    display:grid;
+    grid-template-columns:repeat(9, 1fr);
+    grid-template-rows:repeat(9, 1fr);
+    width:100%;max-width:468px;aspect-ratio:1;
+    background:var(--line);
+    gap:1px;
+    border:3px solid var(--gold);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .cell{
+    background:var(--panel);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .cell input{
+    width:100%;height:100%;border:none;background:transparent;
+    text-align:center;font-family:'Space Mono',monospace;font-size:1.15rem;
+    color:var(--text);outline:none;caret-color:var(--gold);
+  }
+  .cell.given input{color:var(--muted);font-weight:700;pointer-events:none;}
+  .cell.conflict{background:rgba(227,123,107,0.35);}
+  .cell.border-right{border-right:2px solid var(--gold);}
+  .cell.border-bottom{border-bottom:2px solid var(--gold);}
+
+  .status-note{
+    text-align:center;font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);
+    padding:16px 22px 0;
+  }
+
+  .win-banner{
+    text-align:center;padding:26px 22px;
+  }
+  .win-banner h2{color:var(--gold-bright);font-size:1.6rem;margin-bottom:6px;text-shadow:0 0 20px rgba(255,216,115,0.4);}
+  .win-banner p{color:var(--muted);font-family:'Space Mono',monospace;font-size:0.85rem;}
+
+  @media (max-width:400px){
+    .header h1{font-size:1.6rem;}
+    .cell input{font-size:0.95rem;}
+  }
+</style>
+</head>
+<body>
+<script src="achievements.js"></script>
+<div id="app"></div>
+
+<script>
+// Verified: 28 givens, unique solution, and basic techniques (naked/hidden singles,
+// pointing pairs) only fill 38/81 cells before getting stuck — genuinely Hard.
+const GIVEN_PUZZLE = [
+  [0,0,9,0,0,0,7,4,8],
+  [0,5,8,0,0,0,0,9,0],
+  [0,1,0,9,4,0,3,0,5],
+  [3,0,4,0,0,0,0,0,0],
+  [0,0,0,3,0,0,8,0,0],
+  [0,2,0,0,1,0,0,0,0],
+  [9,8,0,0,0,2,5,0,0],
+  [0,0,7,0,0,0,0,0,0],
+  [5,4,0,1,0,0,0,7,9]
+];
+
+// TEMPORARY — for testing only, remove before sending to Pat
+const DEV_SOLUTION = [
+  [6,3,9,2,5,1,7,4,8],
+  [4,5,8,6,3,7,1,9,2],
+  [7,1,2,9,4,8,3,6,5],
+  [3,9,4,8,2,5,6,1,7],
+  [1,7,5,3,6,9,8,2,4],
+  [8,2,6,7,1,4,9,5,3],
+  [9,8,1,4,7,2,5,3,6],
+  [2,6,7,5,9,3,4,8,1],
+  [5,4,3,1,8,6,2,7,9]
+];
+function devFillSolution(){
+  grid = DEV_SOLUTION.map(row => row.slice());
+  render();
+}
+
+let grid = GIVEN_PUZZLE.map(row => row.slice());
+
+function isGiven(r, c){
+  return GIVEN_PUZZLE[r][c] !== 0;
+}
+
+function checkConflicts(){
+  const conflicts = new Set();
+  for (let i = 0; i < 9; i++){
+    const rowSeen = {}, colSeen = {}, boxSeen = {};
+    for (let j = 0; j < 9; j++){
+      const rv = grid[i][j];
+      if (rv){
+        if (rowSeen[rv] !== undefined){ conflicts.add(i+","+j); conflicts.add(i+","+rowSeen[rv]); }
+        rowSeen[rv] = j;
+      }
+      const cv = grid[j][i];
+      if (cv){
+        if (colSeen[cv] !== undefined){ conflicts.add(j+","+i); conflicts.add(colSeen[cv]+","+i); }
+        colSeen[cv] = j;
+      }
+      const br = 3*Math.floor(i/3) + Math.floor(j/3);
+      const bc = 3*(i%3) + (j%3);
+      const bv = grid[br][bc];
+      if (bv){
+        const key = bv;
+        if (boxSeen[key] !== undefined){
+          conflicts.add(br+","+bc);
+          const [pr,pc] = boxSeen[key];
+          conflicts.add(pr+","+pc);
+        }
+        boxSeen[key] = [br,bc];
+      }
+    }
+  }
+  return conflicts;
+}
+
+function isComplete(){
+  for (let r=0;r<9;r++) for (let c=0;c<9;c++) if (!grid[r][c]) return false;
+  return true;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  const conflicts = checkConflicts();
+  const complete = isComplete();
+  const solved = complete && conflicts.size === 0;
+
+  let boardHtml = '';
+  for (let r=0;r<9;r++){
+    for (let c=0;c<9;c++){
+      const given = isGiven(r,c);
+      const val = grid[r][c] || '';
+      const classes = ['cell'];
+      if (given) classes.push('given');
+      if (conflicts.has(r+","+c)) classes.push('conflict');
+      if (c===2 || c===5) classes.push('border-right');
+      if (r===2 || r===5) classes.push('border-bottom');
+      boardHtml += `<div class="${classes.join(' ')}">
+        <input type="text" inputmode="numeric" maxlength="1" data-r="${r}" data-c="${c}"
+          value="${val}" ${given ? 'disabled' : ''}
+          oninput="onCellInput(this, ${r}, ${c})">
+      </div>`;
+    }
+  }
+
+  const note = solved
+    ? ''
+    : (complete ? "Something's off — check for conflicts." : "");
+
+  const winHtml = solved ? `
+    <div class="win-banner">
+      <h2>Solved.</h2>
+      <p>That's the hard one.</p>
+      <div style="margin-top:14px;">
+        <a href="open-water.html" style="display:inline-block;font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--gold-bright);text-decoration:underline;">Next puzzle set →</a>
+      </div>
+    </div>
+  ` : '';
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="eyebrow">Puzzles for Patrick</div>
+      <h1>What, you didn't think I'd put a sudoku in here?</h1>
+      <div class="sub">Do you even know me at all?</div>
+      <a href="hollow-knight.html" style="display:inline-block;margin-top:10px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-decoration:underline;">← Previous puzzle set</a>
+      <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+          <a href="suits-you.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">1 Suits</a>
+          <a href="hollow-knight.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">2 Hollow</a>
+          <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">3 Sudoku</a>
+          <a href="open-water.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">4 Water</a>
+          <a href="a-long-time-ago.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">5 Wars</a>
+          <a href="discovery.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">6 Disc</a>
+          <a href="crossword.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">7 X-word</a>
+        </div>
+      </div>
+    </div>
+    <div class="board-wrap"><div class="board">${boardHtml}</div></div>
+    <div class="status-note">${note}</div>
+    ${winHtml}
+    <div style="text-align:center;padding-top:14px;">
+      <button onclick="devFillSolution()" style="font-family:'Space Mono',monospace;font-size:0.7rem;background:none;border:1px dashed var(--muted);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;">
+        DEV: Fill Solution (remove before gifting)
+      </button>
+    </div>
+  `;
+}
+
+function onCellInput(el, r, c){
+  let v = el.value.replace(/[^1-9]/g, '').slice(0,1);
+  el.value = v;
+  grid[r][c] = v ? parseInt(v) : 0;
+  render();
+  if (!isComplete() || checkConflicts().size > 0){
+    const input = document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
+    if (input) input.focus();
+  }
+}
+
+render();
+</script>
+</body>
+</html>

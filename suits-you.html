@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Common Thread</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt: #0B3D2E;
+    --felt-deep: #062A20;
+    --panel: #0F4A38;
+    --panel-alt: #145843;
+    --line: #1F6B52;
+    --text: #F3EFE3;
+    --muted: #9FC4B4;
+    --gold: #E8B84B;
+    --gold-bright: #FFD873;
+    --cream: #FBF6EA;
+    --red-suit: #C0403B;
+    --black-suit: #1B1B1B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 50% -10%, #145843 0%, var(--felt) 45%, var(--felt-deep) 100%);
+    min-height:100vh;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  #app{max-width:520px;margin:0 auto;min-height:100vh;padding:0 0 60px;position:relative;}
+
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;}
+  .eyebrow{
+    font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--gold);
+  }
+
+  .header{padding:36px 26px 18px;text-align:center;}
+  .header h1{font-size:2.2rem;margin-bottom:8px;}
+  .header .sub{color:var(--muted);font-size:0.95rem;line-height:1.55;max-width:400px;margin:0 auto;}
+
+  .clue-list{padding:10px 22px;display:flex;flex-direction:column;gap:14px;}
+  .clue-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:16px 18px;transition:border-color 0.2s ease, background 0.2s ease, opacity 0.3s ease;
+  }
+  .clue-card.solved{border-color:var(--gold);background:linear-gradient(145deg,#16513e,#0F4A38);}
+  .clue-card.locked{opacity:0.4;pointer-events:none;}
+  .clue-text{font-size:0.95rem;line-height:1.45;margin-bottom:10px;}
+  .answer-row{display:flex;gap:10px;align-items:center;}
+  .tile-input{
+    flex:1;font-family:'Space Mono',monospace;font-size:1.1rem;letter-spacing:0.4em;
+    text-transform:uppercase;background:transparent;border:none;border-bottom:2px solid var(--line);
+    color:var(--text);padding:4px 2px;outline:none;
+  }
+  .tile-input:focus{border-color:var(--gold);}
+  .clue-card.solved .tile-input{border-color:var(--gold);color:var(--gold-bright);pointer-events:none;}
+  .check-icon{font-family:'Space Mono',monospace;color:var(--gold-bright);font-size:1rem;width:20px;text-align:center;}
+  .hint-btn{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.05em;
+    padding:4px 10px;border-radius:999px;cursor:pointer;margin-top:8px;
+  }
+  .hint-btn:hover{border-color:var(--gold);color:var(--gold-bright);}
+  .hint-text{font-size:0.78rem;color:var(--gold-bright);margin-top:8px;font-family:'Space Mono',monospace;line-height:1.4;}
+  .hint-yellow{color:#FFE066;font-weight:700;background:rgba(255,224,102,0.12);border-radius:3px;padding:0 3px;}
+  .hint-pink{color:#FF7FB4;font-weight:700;background:rgba(255,127,180,0.12);border-radius:3px;padding:0 3px;}
+  .hint-blue{color:#7EC8E3;font-weight:700;background:rgba(126,200,227,0.14);border-radius:3px;padding:0 3px;}
+  .shake{animation:shake 0.35s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+  .locked-note{
+    font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);
+    text-align:center;margin-top:20px;
+  }
+
+  /* ---------- FLUSH OVERLAY ---------- */
+  #flush-overlay{
+    position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%, #0F4A38 0%, var(--felt-deep) 75%);
+    display:none;align-items:center;justify-content:center;flex-direction:column;
+    z-index:1000;
+  }
+  #flush-overlay.active{display:flex;}
+  .flush-title{
+    font-family:'Fraunces',serif;font-weight:700;font-size:2.4rem;color:var(--gold-bright);
+    margin-bottom:8px;opacity:0;animation:titleIn 0.6s ease 1.6s forwards;
+    text-shadow:0 0 24px rgba(255,216,115,0.5);
+  }
+  .flush-sub{
+    font-family:'Space Mono',monospace;font-size:0.85rem;color:var(--muted);
+    opacity:0;animation:titleIn 0.6s ease 1.9s forwards;
+  }
+  @keyframes titleIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  .card-fan{position:relative;width:340px;height:220px;margin-bottom:20px;}
+  .card{
+    position:absolute;left:50%;top:50%;width:100px;height:150px;
+    background:var(--cream);border-radius:10px;border:1px solid #d9cfb6;
+    box-shadow:0 10px 26px rgba(0,0,0,0.45);
+    transform:translate(-50%,-50%) translateY(80px) scale(0.4) rotate(0deg);
+    opacity:0;
+    animation:dealIn 0.55s cubic-bezier(.2,.9,.3,1.3) forwards;
+    display:flex;flex-direction:column;justify-content:space-between;padding:8px;
+    font-family:'Fraunces',serif;
+  }
+  .card .rank-top{font-size:1.1rem;font-weight:700;line-height:1;}
+  .card .suit-mid{font-size:2.2rem;text-align:center;line-height:1;}
+  .card .rank-bottom{font-size:1.1rem;font-weight:700;align-self:flex-end;transform:rotate(180deg);line-height:1;}
+  .card.red{color:var(--red-suit);}
+  .card.black{color:var(--black-suit);}
+  .card.gold-card{color:var(--gold);border-color:var(--gold);box-shadow:0 10px 30px rgba(232,184,75,0.45), 0 10px 26px rgba(0,0,0,0.45);}
+  .card.gold-card .suit-mid{font-size:1.9rem;}
+
+  @keyframes dealIn{
+    to{opacity:1;}
+  }
+
+  .replay-btn{
+    font-family:'Space Mono',monospace;font-size:0.85rem;background:var(--panel-alt);
+    color:var(--text);border:1px solid var(--gold);padding:12px 22px;border-radius:999px;
+    cursor:pointer;opacity:0;animation:titleIn 0.6s ease 2.2s forwards;
+  }
+  .replay-btn:hover{background:var(--gold);color:var(--felt-deep);}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important;transition:none !important;} }
+</style>
+</head>
+<body>
+<script src="achievements.js"></script>
+<div id="app"></div>
+<div id="flush-overlay">
+  <div class="card-fan" id="card-fan"></div>
+  <div class="flush-title">FIVE OF A KIND!</div>
+  <div class="flush-sub">Get it? Hehe.</div>
+  <br>
+  <button class="replay-btn" onclick="closeFlush()">Back to puzzle</button>
+  <a href="hollow-knight.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;opacity:0;animation:titleIn 0.6s ease 2.4s forwards;text-decoration:underline;">Next puzzle set →</a>
+</div>
+
+<script>
+const CLUES = [
+  {
+    id: "shovel",
+    word: "SHOVEL",
+    clue: "Push through first loss; dig deep! (6)",
+    hint: "Charade: SHOVE (push through) + L (first letter of loss)",
+    hintHtml: "<span class=\"hint-yellow\">Push through</span> <span class=\"hint-pink\">first</span> <span class=\"hint-yellow\">loss</span>; <span class=\"hint-blue\">dig deep!</span> (6)",
+    suitSymbol: "♠",
+    suitClass: "black"
+  },
+  {
+    id: "gem",
+    word: "GEM",
+    clue: "Half of Castor and Pollux, processed and prized (3)",
+    hint: "Castor and Pollux = GEMINI; take the first half",
+    hintHtml: "<span class=\"hint-pink\">Half of</span> <span class=\"hint-yellow\">Castor and Pollux</span>, <span class=\"hint-blue\">processed and prized</span> (3)",
+    suitSymbol: "♦",
+    suitClass: "red"
+  },
+  {
+    id: "organ",
+    word: "ORGAN",
+    clue: "A confused groan echoing in the cathedral (5)",
+    hint: "Anagram of GROAN",
+    hintHtml: "A <span class=\"hint-pink\">confused</span> <span class=\"hint-yellow\">groan</span> <span class=\"hint-blue\">echoing in the cathedral</span> (5)",
+    suitSymbol: "♥",
+    suitClass: "red"
+  },
+  {
+    id: "clover",
+    word: "CLOVER",
+    clue: "Carbon flame distinctly green (6)",
+    hint: "Charade: C (carbon) + LOVER (old flame)",
+    hintHtml: "<span class=\"hint-yellow\">Carbon flame</span> <span class=\"hint-blue\">distinctly green</span> (6)",
+    suitSymbol: "♣",
+    suitClass: "black"
+  },
+  {
+    id: "joker",
+    word: "JOKER",
+    clue: "Jerk addled with love - now that's a wildcard! (5)",
+    hint: "Anagram of JERK + O (love, as in tennis)",
+    hintHtml: "<span class=\"hint-yellow\">Jerk</span> <span class=\"hint-pink\">addled with</span> <span class=\"hint-yellow\">love</span> - now <span class=\"hint-blue\">that's a wildcard!</span> (5)"
+  }
+];
+
+const FLUSH_CLUE = {
+  id: "flush",
+  clue: "Peace in a pic! Natural, cardinal, and prime (4)",
+  hint: "Peace sign = V (Roman numeral); 5 is natural, cardinal, and prime",
+  hintHtml: "<span class=\"hint-yellow\">Peace</span> in a pic! <span class=\"hint-blue\">Natural, cardinal, and prime</span> (4)",
+  answer: "FIVE",
+  display: "FIVE OF A KIND"
+};
+
+function normalizeAnswer(s){
+  return s.trim().toUpperCase().replace(/[^A-Z]/g, '');
+}
+
+const SUIT_ICONS = {
+  shovel: "♠",
+  gem: "♦",
+  organ: "♥",
+  clover: "♣",
+  joker: "🃏"
+};
+
+let state = {
+  solved: {},
+  hintsShown: {},
+};
+
+function render(){
+  const app = document.getElementById('app');
+
+  let clueCards = CLUES.map(c => {
+    const isSolved = state.solved[c.id];
+    const fullyRevealed = state.solved['flush'];
+    const iconChar = isSolved ? (fullyRevealed ? SUIT_ICONS[c.id] : '✓') : '';
+    const placeholder = Array(c.word.length).fill('_').join(' ');
+    return `
+      <div class="clue-card ${isSolved ? 'solved' : ''}" id="card-${c.id}">
+        <div class="clue-text">${(!isSolved && state.hintsShown[c.id] && c.hintHtml) ? c.hintHtml : c.clue}</div>
+        ${(!isSolved && c.hintHtml) ? `<button class="hint-btn" onclick="toggleHint('${c.id}')">${state.hintsShown[c.id] ? 'Hide hint' : 'Show hint'}</button>` : ''}
+        <div class="answer-row">
+          <input class="tile-input" maxlength="${c.word.length}" placeholder="${placeholder}"
+            value="${isSolved ? c.word : ''}"
+            ${isSolved ? 'disabled' : ''}
+            oninput="this.value=this.value.toUpperCase()"
+            onkeydown="if(event.key==='Enter'){checkAnswer('${c.id}')}">
+          <span class="check-icon">${iconChar}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const flushSolved = state.solved['flush'];
+  let flushCard = `
+    <div class="clue-card ${flushSolved ? 'solved' : ''}" id="card-flush">
+      <div class="clue-text">${(!flushSolved && state.hintsShown['flush'] && FLUSH_CLUE.hintHtml) ? FLUSH_CLUE.hintHtml : FLUSH_CLUE.clue}</div>
+      ${(!flushSolved && FLUSH_CLUE.hintHtml) ? `<button class="hint-btn" onclick="toggleHint('flush')">${state.hintsShown['flush'] ? 'Hide hint' : 'Show hint'}</button>` : ''}
+      <div class="answer-row">
+        <input class="tile-input" maxlength="${FLUSH_CLUE.answer.length}" placeholder="${Array(FLUSH_CLUE.answer.length).fill('_').join(' ')}"
+          value="${flushSolved ? FLUSH_CLUE.display : ''}"
+          ${flushSolved ? 'disabled' : ''}
+          oninput="this.value=this.value.toUpperCase()"
+          onkeydown="if(event.key==='Enter'){checkFlush()}">
+        <span class="check-icon">${flushSolved ? '✓' : ''}</span>
+      </div>
+    </div>
+  `;
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="eyebrow">Puzzles for Patrick</div>
+      <h1>Common Thread</h1>
+      <div class="sub">You know what to do.</div>
+      <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+          <a href="suits-you.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">1 Suits</a>
+          <a href="hollow-knight.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">2 Hollow</a>
+          <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">3 Sudoku</a>
+          <a href="open-water.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">4 Water</a>
+          <a href="a-long-time-ago.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">5 Wars</a>
+          <a href="discovery.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">6 Disc</a>
+          <a href="crossword.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">7 X-word</a>
+        </div>
+      </div>
+    </div>
+    <div class="clue-list">
+      ${clueCards}
+      ${flushCard}
+    </div>
+    ${state.solved['flush'] ? `
+      <div style="text-align:center;margin-top:26px;">
+        <a href="hollow-knight.html" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">Next puzzle set →</a>
+      </div>
+    ` : ''}
+  `;
+
+  // wire blur-to-check for unsolved inputs
+  CLUES.forEach(c => {
+    if (!state.solved[c.id]) {
+      const input = document.querySelector(`#card-${c.id} .tile-input`);
+      if (input) {
+        input.addEventListener('blur', () => {
+          if (input.value.trim().length === c.word.length) checkAnswer(c.id);
+        });
+      }
+    }
+  });
+  if (!flushSolved) {
+    const input = document.querySelector(`#card-flush .tile-input`);
+    if (input) {
+      input.addEventListener('blur', () => {
+        if (normalizeAnswer(input.value).length === FLUSH_CLUE.answer.length) checkFlush();
+      });
+    }
+  }
+}
+
+function checkAnswer(id){
+  const clueObj = CLUES.find(c => c.id === id);
+  const row = document.getElementById(`card-${id}`);
+  const input = row.querySelector('.tile-input');
+  const val = input.value.trim().toUpperCase();
+  if (val === clueObj.word) {
+    state.solved[id] = true;
+    render();
+  } else {
+    row.classList.add('shake');
+    setTimeout(() => row.classList.remove('shake'), 350);
+  }
+}
+
+function toggleHint(id){
+  state.hintsShown[id] = !state.hintsShown[id];
+  render();
+}
+
+function checkFlush(){
+  const row = document.getElementById('card-flush');
+  const input = row.querySelector('.tile-input');
+  const val = normalizeAnswer(input.value);
+  if (val === FLUSH_CLUE.answer) {
+    input.disabled = true;
+    animateFlushReveal(input);
+  } else {
+    row.classList.add('shake');
+    setTimeout(() => row.classList.remove('shake'), 350);
+  }
+}
+
+function animateFlushReveal(input){
+  const suffix = " OF A KIND";
+  let i = 0;
+  setTimeout(() => {
+    const interval = setInterval(() => {
+      i++;
+      input.value = "FIVE" + suffix.slice(0, i);
+      if (i >= suffix.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          state.solved['flush'] = true;
+          render();
+          setTimeout(showFlushAnimation, 250);
+        }, 300);
+      }
+    }, 70);
+  }, 1000);
+}
+
+const HAND = [
+  { rank: "9", suit: "♠", cls: "black" },
+  { rank: "9", suit: "♦", cls: "red" },
+  { rank: "9", suit: "♥", cls: "red" },
+  { rank: "9", suit: "♣", cls: "black" },
+  { rank: "JKR", suit: "🃏", cls: "gold-card" }
+];
+function showFlushAnimation(){
+  const overlay = document.getElementById('flush-overlay');
+  const fan = document.getElementById('card-fan');
+  fan.innerHTML = '';
+  const n = HAND.length;
+  const spread = 26; // degrees between cards
+  const startAngle = -((n-1)/2) * spread;
+  for (let i = 0; i < n; i++){
+    const angle = startAngle + i * spread;
+    const xOffset = angle * 2.4;
+    const { rank, suit, cls } = HAND[i];
+    const card = document.createElement('div');
+    card.className = `card ${cls}`;
+    card.style.animationDelay = (i * 0.12) + 's';
+    card.style.transform = `translate(calc(-50% + ${xOffset}px), -50%) translateY(80px) scale(0.4) rotate(0deg)`;
+    card.innerHTML = `
+      <div class="rank-top">${rank}<br>${suit}</div>
+      <div class="suit-mid">${suit}</div>
+      <div class="rank-bottom">${rank}<br>${suit}</div>
+    `;
+    fan.appendChild(card);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        card.style.transition = 'transform 0.55s cubic-bezier(.2,.9,.3,1.3), opacity 0.55s ease';
+        card.style.transform = `translate(calc(-50% + ${xOffset}px), -50%) translateY(0) scale(1) rotate(${angle}deg)`;
+      }, i * 120);
+    });
+  }
+  overlay.classList.add('active');
+}
+
+function closeFlush(){
+  document.getElementById('flush-overlay').classList.remove('active');
+}
+
+render();
+</script>
+</body>
+</html>

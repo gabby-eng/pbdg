@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Deeper Down</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt: #0B3D2E;
+    --felt-deep: #062A20;
+    --panel: #0F4A38;
+    --panel-alt: #145843;
+    --line: #1F6B52;
+    --text: #F3EFE3;
+    --muted: #9FC4B4;
+    --gold: #E8B84B;
+    --gold-bright: #FFD873;
+    --cream: #FBF6EA;
+    --red-suit: #C0403B;
+    --black-suit: #1B1B1B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 50% -10%, #145843 0%, var(--felt) 45%, var(--felt-deep) 100%);
+    min-height:100vh;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  #app{max-width:520px;margin:0 auto;min-height:100vh;padding:0 0 60px;position:relative;}
+
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;}
+  .eyebrow{
+    font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--gold);
+  }
+
+  .header{padding:36px 26px 18px;text-align:center;}
+  .header h1{font-size:2.2rem;margin-bottom:8px;}
+  .header .sub{color:var(--muted);font-size:0.95rem;line-height:1.55;max-width:400px;margin:0 auto;}
+
+  .clue-list{padding:10px 22px;display:flex;flex-direction:column;gap:14px;}
+  .clue-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:16px 18px;transition:border-color 0.2s ease, background 0.2s ease, opacity 0.3s ease;
+  }
+  .clue-card.solved{border-color:var(--gold);background:linear-gradient(145deg,#16513e,#0F4A38);}
+  .clue-card.locked{opacity:0.4;pointer-events:none;}
+  .clue-text{font-size:0.95rem;line-height:1.45;margin-bottom:10px;}
+  .answer-row{display:flex;gap:10px;align-items:center;}
+  .tile-input{
+    flex:1;font-family:'Space Mono',monospace;font-size:1.1rem;letter-spacing:0.4em;
+    text-transform:uppercase;background:transparent;border:none;border-bottom:2px solid var(--line);
+    color:var(--text);padding:4px 2px;outline:none;
+  }
+  .tile-input:focus{border-color:var(--gold);}
+  .clue-card.solved .tile-input{border-color:var(--gold);color:var(--gold-bright);pointer-events:none;}
+  .check-icon{font-family:'Space Mono',monospace;color:var(--gold-bright);font-size:1rem;width:20px;text-align:center;}
+  .hint-btn{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.05em;
+    padding:4px 10px;border-radius:999px;cursor:pointer;margin-top:8px;
+  }
+  .hint-btn:hover{border-color:var(--gold);color:var(--gold-bright);}
+  .hint-text{font-size:0.78rem;color:var(--gold-bright);margin-top:8px;font-family:'Space Mono',monospace;line-height:1.4;}
+  .hint-yellow{color:#FFE066;font-weight:700;background:rgba(255,224,102,0.12);border-radius:3px;padding:0 3px;}
+  .hint-pink{color:#FF7FB4;font-weight:700;background:rgba(255,127,180,0.12);border-radius:3px;padding:0 3px;}
+  .hint-blue{color:#7EC8E3;font-weight:700;background:rgba(126,200,227,0.14);border-radius:3px;padding:0 3px;}
+  .shake{animation:shake 0.35s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+  .locked-note{
+    font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);
+    text-align:center;margin-top:20px;
+  }
+
+  /* ---------- REVEAL OVERLAY ---------- */
+  #reveal-overlay{
+    position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%, #0F4A38 0%, var(--felt-deep) 75%);
+    display:none;align-items:center;justify-content:center;flex-direction:column;
+    z-index:1000;
+  }
+  #reveal-overlay.active{display:flex;}
+  .reveal-title{
+    font-family:'Fraunces',serif;font-weight:700;font-size:1.5rem;color:var(--gold-bright);
+    margin-bottom:8px;opacity:0;animation:titleIn 0.6s ease 0.3s forwards;
+    text-shadow:0 0 24px rgba(255,216,115,0.5);
+    text-align:center;letter-spacing:0.02em;padding:0 24px;line-height:1.3;
+  }
+  .reveal-sub{
+    font-family:'Space Mono',monospace;font-size:0.85rem;color:var(--muted);
+    opacity:0;animation:titleIn 0.6s ease 0.6s forwards;
+    text-align:center;padding:0 30px;
+  }
+  @keyframes titleIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  .replay-btn{
+    font-family:'Space Mono',monospace;font-size:0.85rem;background:var(--panel-alt);
+    color:var(--text);border:1px solid var(--gold);padding:12px 22px;border-radius:999px;
+    cursor:pointer;opacity:0;animation:titleIn 0.6s ease 0.9s forwards;
+    margin-top:10px;
+  }
+  .replay-btn:hover{background:var(--gold);color:var(--felt-deep);}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important;transition:none !important;} }
+</style>
+</head>
+<body>
+<script src="achievements.js"></script>
+<div id="app"></div>
+<div id="reveal-overlay">
+  <div class="reveal-title">OF COURSE THERE WOULD BE HOLLOW KNIGHT</div>
+  <div class="reveal-sub">And no, I still haven't completed the Pantheon of the Sage LOL</div>
+  <button class="replay-btn" onclick="closeReveal()">Back to puzzle</button>
+  <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;opacity:0;animation:titleIn 0.6s ease 1.2s forwards;text-decoration:underline;">Next puzzle set →</a>
+</div>
+
+<script>
+const CLUES = [
+  {
+    id: "artist",
+    word: "ARTIST",
+    clue: "Tristana sidesteps the last duo then jumps - a pro at drawing enemies (6)",
+    hint: "TRISTANA minus its last two letters (NA) = TRISTA; anagram of TRISTA",
+    hintHtml: "<span class=\"hint-yellow\">Tristana</span> <span class=\"hint-pink\">sidesteps the last duo then jumps</span> - <span class=\"hint-blue\">a pro at drawing enemies</span> (6)"
+  },
+  {
+    id: "shade",
+    word: "SHADE",
+    clue: "Shelter from swelter means you can cross out crazy deaths! (5)",
+    hint: "Anagram of DEATHS (crazy), then remove T (cross)",
+    hintHtml: "<span class=\"hint-blue\">Shelter from swelter</span> means you can <span class=\"hint-pink\">cross out crazy</span> <span class=\"hint-yellow\">deaths</span>! (5)"
+  },
+  {
+    id: "sage",
+    word: "SAGE",
+    clue: "Hollow and hazy gauges yet fragrant and some highly revered (4)",
+    hint: "GAUGES with middle two letters (UG) removed = GAES; anagram of GAES (hazy)",
+    hintHtml: "<span class=\"hint-pink\">Hollow</span> and <span class=\"hint-pink\">hazy</span> <span class=\"hint-yellow\">gauges</span> yet <span class=\"hint-blue\">fragrant and some highly revered</span> (4)"
+  },
+  {
+    id: "master",
+    word: "MASTER",
+    clue: "A swirling stream commands respect (6)",
+    hint: "Anagram of STREAM (swirling)",
+    hintHtml: "A <span class=\"hint-pink\">swirling</span> <span class=\"hint-yellow\">stream</span> <span class=\"hint-blue\">commands respect</span> (6)"
+  },
+  {
+    id: "pale",
+    word: "PALE",
+    clue: "A mangled leap off a cliff is beyond unacceptable behavior! (4)",
+    hint: "Anagram of LEAP",
+    hintHtml: "A <span class=\"hint-pink\">mangled</span> <span class=\"hint-yellow\">leap</span> off a cliff is <span class=\"hint-blue\">beyond unacceptable behavior</span>! (4)"
+  },
+  {
+    id: "knight",
+    word: "KNIGHT",
+    clue: "A solemn warrior bears the cost as the battles of tooth and nail echo the evening (6)",
+    hint: "Homophone: 'the evening' = NIGHT, which sounds like KNIGHT (silent K)",
+    hintHtml: "A <span class=\"hint-blue\">solemn warrior</span> bears the cost as the battles of tooth and nail <span class=\"hint-pink\">echo</span> <span class=\"hint-yellow\">the evening</span> (6)"
+  },
+  {
+    id: "hallownest",
+    word: "HALLOWNEST",
+    clue: "Sacred home to bird and bug, a kingdom sleeps (10)",
+    hint: "Charade: HALLOW (sacred) + NEST (home to bird and bug)",
+    hintHtml: "<span class=\"hint-yellow\">Sacred home to bird and bug</span>, <span class=\"hint-blue\">a kingdom sleeps</span> (10)"
+  }
+];
+
+const REVEAL = {
+  id: "reveal",
+  prompt: "Gilded neon paths twisting up to the sky, dedications to the gods (9)",
+  answer: "PANTHEONS",
+  hint: "Anagram of NEON PATHS (twisting)"
+};
+
+function normalize(s){
+  return s.trim().toUpperCase().replace(/[^A-Z]/g, '');
+}
+
+let state = {
+  solved: {},
+  hintsShown: {},
+};
+
+function render(){
+  const app = document.getElementById('app');
+  const solvedCount = CLUES.filter(c => state.solved[c.id]).length;
+  const allSolved = solvedCount === CLUES.length;
+
+  let clueCards = CLUES.map(c => {
+    const isSolved = state.solved[c.id];
+    const placeholder = Array(c.word.length).fill('_').join(' ');
+    return `
+      <div class="clue-card ${isSolved ? 'solved' : ''}" id="card-${c.id}">
+        <div class="clue-text">${(!isSolved && state.hintsShown[c.id] && c.hintHtml) ? c.hintHtml : c.clue}</div>
+        ${(!isSolved && c.hintHtml) ? `<button class="hint-btn" onclick="toggleHint('${c.id}')">${state.hintsShown[c.id] ? 'Hide hint' : 'Show hint'}</button>` : ''}
+        <div class="answer-row">
+          <input class="tile-input" maxlength="${c.word.length}" placeholder="${placeholder}"
+            value="${isSolved ? c.word : ''}"
+            ${isSolved ? 'disabled' : ''}
+            oninput="this.value=this.value.toUpperCase()"
+            onkeydown="if(event.key==='Enter'){checkAnswer('${c.id}')}">
+          <span class="check-icon">${isSolved ? '✓' : ''}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const revealSolved = state.solved['reveal'];
+  let revealCard = `
+    <div class="clue-card ${allSolved ? '' : 'locked'} ${revealSolved ? 'solved' : ''}" id="card-reveal">
+      <div class="clue-text">${allSolved ? REVEAL.prompt : 'Solve all seven above to unlock the final clue.'}</div>
+      ${allSolved ? `
+        <div class="answer-row">
+          <input class="tile-input" maxlength="${REVEAL.answer.length}" placeholder="${Array(REVEAL.answer.length).fill('_').join(' ')}"
+            value="${revealSolved ? REVEAL.answer : ''}"
+            ${revealSolved ? 'disabled' : ''}
+            oninput="this.value=this.value.toUpperCase()"
+            onkeydown="if(event.key==='Enter'){checkReveal()}">
+          <span class="check-icon">${revealSolved ? '✓' : ''}</span>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="eyebrow">Puzzles for Patrick</div>
+      <h1>Deeper Down</h1>
+      <div class="sub">Do you know where this is heading?</div>
+      <a href="suits-you.html" style="display:inline-block;margin-top:10px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-decoration:underline;">← Previous puzzle set</a>
+      <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+          <a href="suits-you.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">1 Suits</a>
+          <a href="hollow-knight.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">2 Hollow</a>
+          <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">3 Sudoku</a>
+          <a href="open-water.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">4 Water</a>
+          <a href="a-long-time-ago.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">5 Wars</a>
+          <a href="discovery.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">6 Disc</a>
+          <a href="crossword.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">7 X-word</a>
+        </div>
+      </div>
+    </div>
+    <div class="clue-list">
+      ${clueCards}
+      ${revealCard}
+    </div>
+    ${allSolved && !revealSolved ? `<div class="locked-note">Five of them share something in common.</div>` : ''}
+    ${state.solved['reveal'] ? `
+      <div style="text-align:center;margin-top:26px;">
+        <a href="digit-ladder.html" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">Next puzzle set →</a>
+      </div>
+    ` : ''}
+  `;
+
+  CLUES.forEach(c => {
+    if (!state.solved[c.id]) {
+      const input = document.querySelector(`#card-${c.id} .tile-input`);
+      if (input) {
+        input.addEventListener('blur', () => {
+          if (input.value.trim().length === c.word.length) checkAnswer(c.id);
+        });
+      }
+    }
+  });
+  if (allSolved && !revealSolved) {
+    const input = document.querySelector(`#card-reveal .tile-input`);
+    if (input) {
+      input.addEventListener('blur', () => {
+        if (normalize(input.value).length >= 5) checkReveal();
+      });
+    }
+  }
+}
+
+function checkAnswer(id){
+  const clueObj = CLUES.find(c => c.id === id);
+  const row = document.getElementById(`card-${id}`);
+  const input = row.querySelector('.tile-input');
+  const val = input.value.trim().toUpperCase();
+  if (val === clueObj.word) {
+    state.solved[id] = true;
+    render();
+  } else {
+    row.classList.add('shake');
+    setTimeout(() => row.classList.remove('shake'), 350);
+  }
+}
+
+function toggleHint(id){
+  state.hintsShown[id] = !state.hintsShown[id];
+  render();
+}
+
+function checkReveal(){
+  const row = document.getElementById('card-reveal');
+  const input = row.querySelector('.tile-input');
+  const val = normalize(input.value);
+  if (val === REVEAL.answer) {
+    state.solved['reveal'] = true;
+    render();
+    setTimeout(showRevealAnimation, 300);
+  } else {
+    row.classList.add('shake');
+    setTimeout(() => row.classList.remove('shake'), 350);
+  }
+}
+
+function showRevealAnimation(){
+  const overlay = document.getElementById('reveal-overlay');
+  overlay.classList.add('active');
+}
+
+function closeReveal(){
+  document.getElementById('reveal-overlay').classList.remove('active');
+}
+
+render();
+</script>
+</body>
+</html>

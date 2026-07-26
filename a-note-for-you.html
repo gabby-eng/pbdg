@@ -114,9 +114,10 @@
   .win-banner p{color:var(--muted);font-family:'Space Mono',monospace;font-size:0.85rem;line-height:1.6;}
 
   .dev-buttons{text-align:center;padding-top:18px;}
-  .dev-buttons button{
+  .dev-buttons button, .dev-buttons a{
     font-family:'Space Mono',monospace;font-size:0.7rem;background:none;border:1px dashed var(--muted);
     color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;margin:0 4px;
+    text-decoration:none;display:inline-block;
   }
 </style>
 </head>
@@ -153,6 +154,14 @@ function devJumpToFinalPage(){
     remainingBanks[i] = p.banks.map(() => []);
   }
   currentPuzzleIndex = PUZZLES.length - 1;
+  selected = null;
+  wrongCells.clear();
+  lockedCells.clear();
+  render();
+}
+function devPreviousPuzzle(){
+  if (currentPuzzleIndex === 0) return;
+  currentPuzzleIndex--;
   selected = null;
   wrongCells.clear();
   lockedCells.clear();
@@ -503,8 +512,10 @@ function render(){
     ${winHtml}
     <div class="dev-buttons">
       <button onclick="devFillSolution()">DEV: Fill Solution (remove before gifting)</button>
+      <button onclick="devPreviousPuzzle()">DEV: Previous Puzzle (remove before gifting)</button>
       <button onclick="devJumpToFinalPage()">DEV: Jump to Final Page (remove before gifting)</button>
       <button onclick="devReset()">DEV: Reset (remove before gifting)</button>
+      <a href="index.html">DEV: Go to Lockbox (remove before gifting)</a>
     </div>
   `;
 }

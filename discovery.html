@@ -120,6 +120,12 @@
     text-align:center;padding:26px 22px;
   }
   .win-banner h2{color:var(--gold-bright);font-size:1.6rem;margin-bottom:6px;text-shadow:0 0 20px rgba(255,216,115,0.4);}
+  .disco-ball{display:inline-block;cursor:pointer;}
+  .disco-ball.spinning{animation:discoSpin 1s linear;}
+  @keyframes discoSpin{
+    from{transform:perspective(240px) rotateY(0deg);}
+    to{transform:perspective(240px) rotateY(360deg);}
+  }
   .win-banner p{color:var(--muted);font-family:'Space Mono',monospace;font-size:0.85rem;}
   .win-banner .prompt{margin-bottom:12px;}
   .word-input{
@@ -236,6 +242,7 @@ function isComplete(){
 
 let candidates = {}; // "r,c" -> Set of digits 1-9
 let selectedCell = null; // {r, c} or null
+let everUsedCandidates = false;
 
 function focusCell(r, c){
   const input = document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
@@ -255,6 +262,9 @@ function render(){
   const conflicts = checkConflicts();
   const complete = isComplete();
   const solved = complete && conflicts.size === 0;
+  if (solved && !everUsedCandidates){
+    window.PatAchievements.unlock('lockedin');
+  }
 
   let boardHtml = '';
   for (let r=0;r<9;r++){
@@ -322,7 +332,7 @@ function render(){
   } else if (wordConfirmed){
     winHtml = `
       <div class="win-banner">
-        <h2>${ANSWER_WORD}</h2>
+        <h2>DISC<span class="disco-ball" id="disco-ball" onclick="spinDiscoBall()">🪩</span>VERY</h2>
         <div style="margin-top:10px;">
           <a href="crossword.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--gold-bright);text-decoration:underline;">Next puzzle set →</a>
         </div>
@@ -394,6 +404,7 @@ function toggleCandidate(r, c, digit){
   } else {
     candidates[key].add(digit);
   }
+  everUsedCandidates = true;
   render();
   focusCell(r, c);
 }
@@ -426,6 +437,19 @@ function checkWordGuess(){
   } else {
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 350);
+  }
+}
+
+let discoSpinCount = 0;
+function spinDiscoBall(){
+  const el = document.getElementById('disco-ball');
+  if (!el) return;
+  el.classList.remove('spinning');
+  void el.offsetWidth; // force reflow so the animation can retrigger
+  el.classList.add('spinning');
+  discoSpinCount++;
+  if (discoSpinCount === 3){
+    window.PatAchievements.unlock('partyanimal');
   }
 }
 

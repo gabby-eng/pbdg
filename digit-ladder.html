@@ -182,6 +182,7 @@ function isComplete(){
 
 let candidates = {}; // "r,c" -> Set of digits 1-9
 let selectedCell = null; // {r, c} or null
+let everUsedCandidates = false;
 
 function focusCell(r, c){
   const input = document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
@@ -201,6 +202,9 @@ function render(){
   const conflicts = checkConflicts();
   const complete = isComplete();
   const solved = complete && conflicts.size === 0;
+  if (solved && !everUsedCandidates){
+    window.PatAchievements.unlock('lockedin');
+  }
 
   let boardHtml = '';
   for (let r=0;r<9;r++){
@@ -315,6 +319,7 @@ function toggleCandidate(r, c, digit){
   } else {
     candidates[key].add(digit);
   }
+  everUsedCandidates = true;
   window.PatAchievements.unlock('candidatenotation');
   render();
   focusCell(r, c);

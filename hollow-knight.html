@@ -180,9 +180,12 @@ const CLUES = [
   }
 ];
 
+const PANTHEON_ORDER = ["master", "artist", "sage", "knight", "hallownest"];
+
 let state = {
   solved: {},
   hintsShown: {},
+  pantheonClicks: [],
 };
 
 function render(){
@@ -246,6 +249,26 @@ function render(){
       }
     }
   });
+
+  if (CLUES.every(c => state.solved[c.id])) {
+    PANTHEON_ORDER.forEach(id => {
+      const row = document.getElementById(`card-${id}`);
+      if (row) row.addEventListener('click', () => handlePantheonClick(id));
+    });
+  }
+}
+
+function handlePantheonClick(id){
+  const nextIndex = state.pantheonClicks.length;
+  if (id === PANTHEON_ORDER[nextIndex]) {
+    state.pantheonClicks.push(id);
+    if (state.pantheonClicks.length === PANTHEON_ORDER.length) {
+      window.PatAchievements.unlock('sharpeye');
+      state.pantheonClicks = [];
+    }
+  } else {
+    state.pantheonClicks = id === PANTHEON_ORDER[0] ? [id] : [];
+  }
 }
 
 function checkAnswer(id){
@@ -254,12 +277,11 @@ function checkAnswer(id){
   const input = row.querySelector('.tile-input');
   const val = input.value.trim().toUpperCase();
   if (val === clueObj.word) {
+    const wasAllSolved = CLUES.every(c => state.solved[c.id]);
     state.solved[id] = true;
     render();
-    if (id === 'pantheons') {
+    if (!wasAllSolved && CLUES.every(c => state.solved[c.id])) {
       setTimeout(showRevealAnimation, 300);
-    }
-    if (CLUES.every(c => state.solved[c.id])) {
       window.PatAchievements.unlock('grubnoises');
     }
   } else {

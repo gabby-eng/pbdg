@@ -10,7 +10,8 @@
     { id: "metadiscovery", title: "Oh what?", sub: "Discover achievements." },
     { id: "curious", title: "Curious!", sub: "Enter an incorrect code 5 times." },
     { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." },
-    { id: "grubnoises", title: "*Grub Noises*", sub: "Hollow Knight mentioned." }
+    { id: "grubnoises", title: "*Grub Noises*", sub: "Hollow Knight mentioned." },
+    { id: "sharpeye", title: "Sharp Eye", sub: "Click on the pantheons in order." }
   ];
 
   function loadUnlockedIds(){
@@ -94,6 +95,13 @@
       .achv-row-sub{font-size:0.68rem;color:var(--muted, #9FC4B4);margin-top:2px;}
       .achv-row.locked .achv-row-title,
       .achv-row.locked .achv-row-sub{color:var(--muted, #9FC4B4);opacity:0.7;}
+      .achv-reset-btn{
+        margin-top:12px;width:100%;
+        background:none;border:1px dashed var(--muted, #9FC4B4);color:var(--muted, #9FC4B4);
+        font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:0.05em;
+        text-transform:uppercase;padding:7px 10px;border-radius:8px;cursor:pointer;
+      }
+      .achv-reset-btn:hover{border-color:var(--gold, #E8B84B);color:var(--gold-bright, #FFD873);}
     `;
     document.head.appendChild(style);
   }
@@ -145,9 +153,8 @@
   }
 
   function renderTrophyIcon(){
-    const anyUnlocked = ACHIEVEMENTS.some(a => a.unlocked);
     let icon = document.getElementById('achv-trophy-icon');
-    if (anyUnlocked && !icon){
+    if (!icon){
       icon = document.createElement('div');
       icon.id = 'achv-trophy-icon';
       icon.className = 'achv-trophy-icon';
@@ -178,8 +185,18 @@
           </div>
         </div>
       `).join('')}
+      <button class="achv-reset-btn" onclick="PatAchievements.reset()">Reset progress (dev)</button>
     `;
     document.body.appendChild(panel);
+  }
+
+  function resetAchievements(){
+    unlockedIds = new Set();
+    saveUnlockedIds([]);
+    ACHIEVEMENTS.forEach(a => { a.unlocked = false; });
+    const panel = document.getElementById('achv-panel');
+    if (panel) panel.remove();
+    toggleAchievementList();
   }
 
   function init(){
@@ -196,6 +213,7 @@
   // expose the API pages need (e.g. index.html calls unlockAchievement directly)
   window.PatAchievements = {
     unlock: unlockAchievement,
+    reset: resetAchievements,
     list: ACHIEVEMENTS
   };
 })();

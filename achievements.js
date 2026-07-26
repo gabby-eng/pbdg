@@ -8,14 +8,14 @@
 
   const ACHIEVEMENT_DEFS = [
     { id: "metadiscovery", title: "Oh what?", sub: "Discover achievements." },
+    { id: "firsttry", title: "First Try", sub: "Enter the correct code on the first attempt." },
     { id: "curious", title: "Curious!", sub: "Enter an incorrect code 5 times." },
     { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." },
     { id: "grubnoises", title: "*Grub Noises*", sub: "Hollow Knight mentioned." },
     { id: "sharpeye", title: "Sharp Eye", sub: "Click on the pantheons in order." },
     { id: "candidatenotation", title: "I Hope You Appreciated That", sub: "Candidate notation utilized." },
     { id: "lockedin", title: "Locked In", sub: "Complete the sudoku without placing a single pencil-mark candidate." },
-    { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." },
-    { id: "firsttry", title: "First Try", sub: "Enter the correct code on the first attempt." }
+    { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." }
   ];
 
   function loadUnlockedIds(){
@@ -92,6 +92,10 @@
         font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;
         color:var(--gold, #E8B84B);margin-bottom:10px;
       }
+      .achv-list{max-height:480px;overflow-y:auto;overflow-x:hidden;margin-right:-6px;padding-right:6px;}
+      .achv-list::-webkit-scrollbar{width:6px;}
+      .achv-list::-webkit-scrollbar-track{background:transparent;}
+      .achv-list::-webkit-scrollbar-thumb{background:var(--line, #1F6B52);border-radius:3px;}
       .achv-row{display:flex;align-items:center;gap:10px;padding:8px 4px;}
       .achv-row + .achv-row{border-top:1px solid var(--line, #1F6B52);}
       .achv-row-icon{font-size:1.2rem;flex-shrink:0;}
@@ -180,15 +184,17 @@
     panel.className = 'achv-panel';
     panel.innerHTML = `
       <div class="achv-panel-title">Achievements</div>
-      ${ACHIEVEMENTS.map(a => `
-        <div class="achv-row ${a.unlocked ? '' : 'locked'}">
-          <div class="achv-row-icon">${a.unlocked ? '🏆' : '🔒'}</div>
-          <div>
-            <div class="achv-row-title">${a.unlocked ? a.title : '???'}</div>
-            <div class="achv-row-sub">${a.unlocked ? a.sub : 'Not yet unlocked.'}</div>
+      <div class="achv-list">
+        ${ACHIEVEMENTS.map(a => `
+          <div class="achv-row ${a.unlocked ? '' : 'locked'}">
+            <div class="achv-row-icon">${a.unlocked ? '🏆' : '🔒'}</div>
+            <div>
+              <div class="achv-row-title">${a.unlocked ? a.title : '???'}</div>
+              <div class="achv-row-sub">${a.unlocked ? a.sub : 'Not yet unlocked.'}</div>
+            </div>
           </div>
-        </div>
-      `).join('')}
+        `).join('')}
+      </div>
       <button class="achv-reset-btn" onclick="PatAchievements.reset()">Reset progress (dev)</button>
     `;
     document.body.appendChild(panel);

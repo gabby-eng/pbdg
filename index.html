@@ -166,6 +166,9 @@ let wrongAttempts = 0;
 function tryUnlock(){
   const entered = digits.join('');
   if (entered === CODE){
+    if (wrongAttempts === 0){
+      window.PatAchievements.unlock('firsttry');
+    }
     unlocked = true;
     render();
   } else {

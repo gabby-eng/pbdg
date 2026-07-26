@@ -14,7 +14,8 @@
     { id: "sharpeye", title: "Sharp Eye", sub: "Click on the pantheons in order." },
     { id: "candidatenotation", title: "I Hope You Appreciated That", sub: "Candidate notation utilized." },
     { id: "lockedin", title: "Locked In", sub: "Complete the sudoku without placing a single pencil-mark candidate." },
-    { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." }
+    { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." },
+    { id: "firsttry", title: "First Try", sub: "Enter the correct code on the first attempt." }
   ];
 
   function loadUnlockedIds(){

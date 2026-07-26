@@ -146,6 +146,18 @@ function devFillSolution(){
   remainingBanks[currentPuzzleIndex] = p.banks.map(() => []);
   render();
 }
+function devJumpToFinalPage(){
+  for (let i = 0; i < PUZZLES.length; i++){
+    const p = PUZZLES[i];
+    userGrids[i] = p.solution.map(row => row.map(v => v === null ? null : v));
+    remainingBanks[i] = p.banks.map(() => []);
+  }
+  currentPuzzleIndex = PUZZLES.length - 1;
+  selected = null;
+  wrongCells.clear();
+  lockedCells.clear();
+  render();
+}
 function devReset(){
   const p = PUZZLES[currentPuzzleIndex];
   userGrids[currentPuzzleIndex] = p.types.map(row => row.map(t => t === 'letter' ? '' : null));
@@ -491,6 +503,7 @@ function render(){
     ${winHtml}
     <div class="dev-buttons">
       <button onclick="devFillSolution()">DEV: Fill Solution (remove before gifting)</button>
+      <button onclick="devJumpToFinalPage()">DEV: Jump to Final Page (remove before gifting)</button>
       <button onclick="devReset()">DEV: Reset (remove before gifting)</button>
     </div>
   `;

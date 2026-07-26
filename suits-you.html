@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Common Thread</title>
+<title>Warm Up</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -258,7 +258,7 @@ function render(){
   app.innerHTML = `
     <div class="header">
       <div class="eyebrow">Puzzles for Patrick</div>
-      <h1>Common Thread</h1>
+      <h1>Warm Up</h1>
       <div class="sub">You know what to do.</div>
       <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
         <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
@@ -349,6 +349,7 @@ function animateFlushReveal(input){
         setTimeout(() => {
           state.solved['flush'] = true;
           render();
+          window.PatAchievements.unlock('warmedup');
           setTimeout(showFlushAnimation, 250);
         }, 300);
       }

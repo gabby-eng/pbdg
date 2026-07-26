@@ -7,8 +7,9 @@
   const STORAGE_KEY = 'puzzlesForPatrick_achievements';
 
   const ACHIEVEMENT_DEFS = [
-    { id: "metadiscovery", title: "Oh what?", sub: "Unlock achievements." },
-    { id: "curious", title: "Curious!", sub: "Enter an incorrect code 5 times." }
+    { id: "metadiscovery", title: "Oh what?", sub: "Discover achievements." },
+    { id: "curious", title: "Curious!", sub: "Enter an incorrect code 5 times." },
+    { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." }
   ];
 
   function loadUnlockedIds(){
@@ -99,9 +100,13 @@
   function unlockAchievement(id){
     const a = ACHIEVEMENTS.find(x => x.id === id);
     if (!a || a.unlocked) return;
+    const isFirstEver = unlockedIds.size === 0;
     a.unlocked = true;
     unlockedIds.add(id);
     saveUnlockedIds([...unlockedIds]);
+    if (isFirstEver && id !== 'metadiscovery') {
+      unlockAchievement('metadiscovery');
+    }
     toastQueue.push(a);
     processToastQueue();
     renderTrophyIcon();

@@ -11,7 +11,8 @@
     { id: "curious", title: "Curious!", sub: "Enter an incorrect code 5 times." },
     { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." },
     { id: "grubnoises", title: "*Grub Noises*", sub: "Hollow Knight mentioned." },
-    { id: "sharpeye", title: "Sharp Eye", sub: "Click on the pantheons in order." }
+    { id: "sharpeye", title: "Sharp Eye", sub: "Click on the pantheons in order." },
+    { id: "candidatenotation", title: "I Hope You Appreciated That", sub: "Candidate notation utilized." }
   ];
 
   function loadUnlockedIds(){

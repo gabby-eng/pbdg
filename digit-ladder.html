@@ -61,8 +61,28 @@
   }
   .cell.given input{color:var(--muted);font-weight:700;pointer-events:none;}
   .cell.conflict{background:rgba(227,123,107,0.35);}
+  .cell.highlight{background:rgba(126,200,227,0.12);}
+  .cell.selected{background:rgba(255,216,115,0.22);}
+  .cell.conflict.highlight{background:rgba(227,123,107,0.35);}
   .cell.border-right{border-right:2px solid var(--gold);}
   .cell.border-bottom{border-bottom:2px solid var(--gold);}
+
+  .cell-container{
+    width:100%;height:100%;outline:none;position:relative;
+  }
+  .candidate-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+    width:100%;height:100%;
+  }
+  .candidate-slot{
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-size:0.55rem;
+    color:transparent;cursor:pointer;user-select:none;
+    transition:background 0.1s ease, color 0.1s ease;
+  }
+  .cell.selected .candidate-slot:hover{background:rgba(255,216,115,0.15);color:var(--muted);}
+  .candidate-slot.active{color:var(--gold-bright);font-weight:700;}
+  .cell-container:focus .candidate-grid{background:rgba(255,216,115,0.06);}
 
   .status-note{
     text-align:center;font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);
@@ -160,6 +180,22 @@ function isComplete(){
   return true;
 }
 
+let candidates = {}; // "r,c" -> Set of digits 1-9
+let selectedCell = null; // {r, c} or null
+
+function focusCell(r, c){
+  const input = document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
+  if (input && !input.disabled){ input.focus(); return; }
+  const container = document.querySelector(`.cell-container[data-r="${r}"][data-c="${c}"]`);
+  if (container) container.focus();
+}
+
+function selectCell(r, c){
+  selectedCell = { r, c };
+  render();
+  focusCell(r, c);
+}
+
 function render(){
   const app = document.getElementById('app');
   const conflicts = checkConflicts();
@@ -174,13 +210,38 @@ function render(){
       const classes = ['cell'];
       if (given) classes.push('given');
       if (conflicts.has(r+","+c)) classes.push('conflict');
+      if (selectedCell){
+        const sameBox = Math.floor(r/3)===Math.floor(selectedCell.r/3) && Math.floor(c/3)===Math.floor(selectedCell.c/3);
+        if (r === selectedCell.r && c === selectedCell.c){
+          classes.push('selected');
+        } else if (r === selectedCell.r || c === selectedCell.c || sameBox){
+          classes.push('highlight');
+        }
+      }
       if (c===2 || c===5) classes.push('border-right');
       if (r===2 || r===5) classes.push('border-bottom');
-      boardHtml += `<div class="${classes.join(' ')}">
-        <input type="text" inputmode="numeric" maxlength="1" data-r="${r}" data-c="${c}"
-          value="${val}" ${given ? 'disabled' : ''}
-          oninput="onCellInput(this, ${r}, ${c})">
-      </div>`;
+
+      if (given || val){
+        boardHtml += `<div class="${classes.join(' ')}" onclick="selectCell(${r},${c})">
+          <input type="text" inputmode="numeric" maxlength="1" data-r="${r}" data-c="${c}"
+            value="${val}" ${given ? 'disabled' : ''}
+            oninput="onCellInput(this, ${r}, ${c})">
+        </div>`;
+      } else {
+        const key = r + "," + c;
+        const cellCands = candidates[key] || new Set();
+        let slotsHtml = '';
+        for (let d = 1; d <= 9; d++){
+          const active = cellCands.has(d) ? 'active' : '';
+          slotsHtml += `<div class="candidate-slot ${active}" onclick="toggleCandidate(${r},${c},${d})">${d}</div>`;
+        }
+        boardHtml += `<div class="${classes.join(' ')}" onclick="selectCell(${r},${c})">
+          <div class="cell-container" tabindex="0" data-r="${r}" data-c="${c}"
+            onkeydown="onEmptyCellKeyDown(event, ${r}, ${c})">
+            <div class="candidate-grid">${slotsHtml}</div>
+          </div>
+        </div>`;
+      }
     }
   }
 
@@ -190,7 +251,7 @@ function render(){
 
   const winHtml = solved ? `
     <div class="win-banner">
-      <h2>Solved.</h2>
+      <h2>Nice.</h2>
       <p>That's the hard one.</p>
       <div style="margin-top:14px;">
         <a href="open-water.html" style="display:inline-block;font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--gold-bright);text-decoration:underline;">Next puzzle set →</a>
@@ -232,12 +293,64 @@ function onCellInput(el, r, c){
   let v = el.value.replace(/[^1-9]/g, '').slice(0,1);
   el.value = v;
   grid[r][c] = v ? parseInt(v) : 0;
+  delete candidates[r+","+c];
+  selectedCell = { r, c };
   render();
   if (!isComplete() || checkConflicts().size > 0){
-    const input = document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
-    if (input) input.focus();
+    focusCell(r, c);
   }
 }
+
+function toggleCandidate(r, c, digit){
+  const alreadySelected = selectedCell && selectedCell.r === r && selectedCell.c === c;
+  if (!alreadySelected){
+    // first click on this cell just selects it — doesn't toggle yet
+    selectCell(r, c);
+    return;
+  }
+  const key = r + "," + c;
+  if (!candidates[key]) candidates[key] = new Set();
+  if (candidates[key].has(digit)){
+    candidates[key].delete(digit);
+  } else {
+    candidates[key].add(digit);
+  }
+  window.PatAchievements.unlock('candidatenotation');
+  render();
+  focusCell(r, c);
+}
+
+function onEmptyCellKeyDown(event, r, c){
+  const key = event.key;
+  if (key >= "1" && key <= "9"){
+    event.preventDefault();
+    grid[r][c] = parseInt(key);
+    delete candidates[r+","+c];
+    selectedCell = { r, c };
+    render();
+    focusCell(r, c);
+  } else if (key === "Backspace" || key === "Delete"){
+    event.preventDefault();
+    delete candidates[r+","+c];
+    selectedCell = { r, c };
+    render();
+    focusCell(r, c);
+  }
+}
+
+const ARROW_DELTAS = {
+  ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1]
+};
+document.addEventListener('keydown', (event) => {
+  const delta = ARROW_DELTAS[event.key];
+  if (!delta || !selectedCell) return;
+  event.preventDefault();
+  const nr = Math.min(8, Math.max(0, selectedCell.r + delta[0]));
+  const nc = Math.min(8, Math.max(0, selectedCell.c + delta[1]));
+  selectedCell = { r: nr, c: nc };
+  render();
+  focusCell(nr, nc);
+});
 
 render();
 </script>

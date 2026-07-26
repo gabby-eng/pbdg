@@ -153,16 +153,16 @@ const CLUES = [
   {
     id: "pale",
     word: "PALE",
-    clue: "A mangled leap off a cliff is beyond unacceptable behavior! (4)",
-    hint: "Anagram of LEAP",
-    hintHtml: "A <span class=\"hint-pink\">mangled</span> <span class=\"hint-yellow\">leap</span> off a cliff is <span class=\"hint-blue\">beyond unacceptable behavior</span>! (4)"
+    clue: "A sorry, jumbled plea... how weak (4)",
+    hint: "Anagram of PLEA",
+    hintHtml: "A sorry, <span class=\"hint-pink\">jumbled</span> <span class=\"hint-yellow\">plea</span>... how <span class=\"hint-blue\">weak</span> (4)"
   },
   {
     id: "knight",
     word: "KNIGHT",
-    clue: "A solemn warrior bears the cost as the battles of tooth and nail echo the evening (6)",
+    clue: "A solemn warrior bears the cost as battles of tooth and nail echo the evening (6)",
     hint: "Homophone: 'the evening' = NIGHT, which sounds like KNIGHT (silent K)",
-    hintHtml: "A <span class=\"hint-blue\">solemn warrior</span> bears the cost as the battles of tooth and nail <span class=\"hint-pink\">echo</span> <span class=\"hint-yellow\">the evening</span> (6)"
+    hintHtml: "A <span class=\"hint-blue\">solemn warrior</span> bears the cost as battles of tooth and nail <span class=\"hint-pink\">echo</span> <span class=\"hint-yellow\">the evening</span> (6)"
   },
   {
     id: "hallownest",
@@ -170,19 +170,15 @@ const CLUES = [
     clue: "Sacred home to bird and bug, a kingdom sleeps (10)",
     hint: "Charade: HALLOW (sacred) + NEST (home to bird and bug)",
     hintHtml: "<span class=\"hint-yellow\">Sacred home to bird and bug</span>, <span class=\"hint-blue\">a kingdom sleeps</span> (10)"
+  },
+  {
+    id: "pantheons",
+    word: "PANTHEONS",
+    clue: "Gilded neon paths twisting up to the sky, dedications to the gods (9)",
+    hint: "Anagram of NEON PATHS (twisting)",
+    hintHtml: "Gilded <span class=\"hint-yellow\">neon paths</span> <span class=\"hint-pink\">twisting</span> up to the sky, <span class=\"hint-blue\">dedications to the gods</span> (9)"
   }
 ];
-
-const REVEAL = {
-  id: "reveal",
-  prompt: "Gilded neon paths twisting up to the sky, dedications to the gods (9)",
-  answer: "PANTHEONS",
-  hint: "Anagram of NEON PATHS (twisting)"
-};
-
-function normalize(s){
-  return s.trim().toUpperCase().replace(/[^A-Z]/g, '');
-}
 
 let state = {
   solved: {},
@@ -191,8 +187,6 @@ let state = {
 
 function render(){
   const app = document.getElementById('app');
-  const solvedCount = CLUES.filter(c => state.solved[c.id]).length;
-  const allSolved = solvedCount === CLUES.length;
 
   let clueCards = CLUES.map(c => {
     const isSolved = state.solved[c.id];
@@ -212,23 +206,6 @@ function render(){
       </div>
     `;
   }).join('');
-
-  const revealSolved = state.solved['reveal'];
-  let revealCard = `
-    <div class="clue-card ${allSolved ? '' : 'locked'} ${revealSolved ? 'solved' : ''}" id="card-reveal">
-      <div class="clue-text">${allSolved ? REVEAL.prompt : 'Solve all seven above to unlock the final clue.'}</div>
-      ${allSolved ? `
-        <div class="answer-row">
-          <input class="tile-input" maxlength="${REVEAL.answer.length}" placeholder="${Array(REVEAL.answer.length).fill('_').join(' ')}"
-            value="${revealSolved ? REVEAL.answer : ''}"
-            ${revealSolved ? 'disabled' : ''}
-            oninput="this.value=this.value.toUpperCase()"
-            onkeydown="if(event.key==='Enter'){checkReveal()}">
-          <span class="check-icon">${revealSolved ? '✓' : ''}</span>
-        </div>
-      ` : ''}
-    </div>
-  `;
 
   app.innerHTML = `
     <div class="header">
@@ -251,10 +228,8 @@ function render(){
     </div>
     <div class="clue-list">
       ${clueCards}
-      ${revealCard}
     </div>
-    ${allSolved && !revealSolved ? `<div class="locked-note">Five of them share something in common.</div>` : ''}
-    ${state.solved['reveal'] ? `
+    ${state.solved['pantheons'] ? `
       <div style="text-align:center;margin-top:26px;">
         <a href="digit-ladder.html" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">Next puzzle set →</a>
       </div>
@@ -271,14 +246,6 @@ function render(){
       }
     }
   });
-  if (allSolved && !revealSolved) {
-    const input = document.querySelector(`#card-reveal .tile-input`);
-    if (input) {
-      input.addEventListener('blur', () => {
-        if (normalize(input.value).length >= 5) checkReveal();
-      });
-    }
-  }
 }
 
 function checkAnswer(id){
@@ -289,6 +256,12 @@ function checkAnswer(id){
   if (val === clueObj.word) {
     state.solved[id] = true;
     render();
+    if (id === 'pantheons') {
+      setTimeout(showRevealAnimation, 300);
+    }
+    if (CLUES.every(c => state.solved[c.id])) {
+      window.PatAchievements.unlock('grubnoises');
+    }
   } else {
     row.classList.add('shake');
     setTimeout(() => row.classList.remove('shake'), 350);
@@ -298,20 +271,6 @@ function checkAnswer(id){
 function toggleHint(id){
   state.hintsShown[id] = !state.hintsShown[id];
   render();
-}
-
-function checkReveal(){
-  const row = document.getElementById('card-reveal');
-  const input = row.querySelector('.tile-input');
-  const val = normalize(input.value);
-  if (val === REVEAL.answer) {
-    state.solved['reveal'] = true;
-    render();
-    setTimeout(showRevealAnimation, 300);
-  } else {
-    row.classList.add('shake');
-    setTimeout(() => row.classList.remove('shake'), 350);
-  }
 }
 
 function showRevealAnimation(){

@@ -9,7 +9,8 @@
   const ACHIEVEMENT_DEFS = [
     { id: "metadiscovery", title: "Oh what?", sub: "Discover achievements." },
     { id: "curious", title: "Curious!", sub: "Enter an incorrect code 5 times." },
-    { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." }
+    { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." },
+    { id: "grubnoises", title: "*Grub Noises*", sub: "Hollow Knight mentioned." }
   ];
 
   function loadUnlockedIds(){

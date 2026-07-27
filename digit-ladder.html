@@ -186,7 +186,7 @@ let everUsedCandidates = false;
 
 function focusCell(r, c){
   const input = document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
-  if (input && !input.disabled){ input.focus(); return; }
+  if (input && !input.disabled){ input.focus(); input.select(); return; }
   const container = document.querySelector(`.cell-container[data-r="${r}"][data-c="${c}"]`);
   if (container) container.focus();
 }

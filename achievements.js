@@ -16,7 +16,8 @@
     { id: "candidatenotation", title: "I Hope You Appreciated That", sub: "Candidate notation utilized." },
     { id: "lockedin", title: "Locked In", sub: "Complete the sudoku without placing a single pencil-mark candidate." },
     { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." },
-    { id: "noshame", title: "No Shame", sub: "Use a hint for the first time." }
+    { id: "noshame", title: "No Shame", sub: "Use a hint for the first time." },
+    { id: "lavieenrose", title: "La Vie En Rose", sub: "Say hello to WALL-E and EVE." }
   ];
 
   function loadUnlockedIds(){
@@ -196,6 +197,7 @@
           </div>
         `).join('')}
       </div>
+      <button class="achv-reset-btn" onclick="PatAchievements.unlockAll()">Unlock all (dev)</button>
       <button class="achv-reset-btn" onclick="PatAchievements.reset()">Reset progress (dev)</button>
     `;
     document.body.appendChild(panel);
@@ -205,6 +207,15 @@
     unlockedIds = new Set();
     saveUnlockedIds([]);
     ACHIEVEMENTS.forEach(a => { a.unlocked = false; });
+    const panel = document.getElementById('achv-panel');
+    if (panel) panel.remove();
+    toggleAchievementList();
+  }
+
+  function unlockAllAchievements(){
+    ACHIEVEMENTS.forEach(a => { a.unlocked = true; unlockedIds.add(a.id); });
+    saveUnlockedIds([...unlockedIds]);
+    renderTrophyIcon();
     const panel = document.getElementById('achv-panel');
     if (panel) panel.remove();
     toggleAchievementList();
@@ -225,6 +236,7 @@
   window.PatAchievements = {
     unlock: unlockAchievement,
     reset: resetAchievements,
+    unlockAll: unlockAllAchievements,
     list: ACHIEVEMENTS
   };
 })();

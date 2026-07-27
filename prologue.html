@@ -53,6 +53,22 @@
     padding:12px 32px;border-radius:999px;cursor:pointer;
   }
   .begin-btn:hover{background:var(--gold-bright);}
+
+  .sprite-row{
+    display:flex;justify-content:center;align-items:flex-end;gap:28px;
+    margin-bottom:22px;
+  }
+  .sprite-row svg{width:84px;height:84px;overflow:visible;display:block;}
+  .sprite-row svg[aria-label="EVE"]{width:98px;height:98px;}
+  .sprite{cursor:pointer;}
+  .sprite.hopping{animation:spriteHop 0.5s ease-out;}
+  @keyframes spriteHop{
+    0%{transform:translateY(0);}
+    30%{transform:translateY(-20px);}
+    50%{transform:translateY(-20px);}
+    75%{transform:translateY(2px);}
+    100%{transform:translateY(0);}
+  }
 </style>
 </head>
 <body>
@@ -62,8 +78,39 @@
   <h1>Before we begin...</h1>
   <div class="message-box">
     <p>Dear Patrick,</p>
-    <p>You have orchestrated so many joyous moments of play for me to enjoy over the years and I wanted to return the favor for your birthday, even if it's just a fraction of it all. Plus, I did not want to make you eat a horribly dry dessert again (sorry about last year, I loved watching WALL-E together, though).</p>
-    <p>Anyway, I hope you'll like this more than the chocolate bread! I designed and wrote all these puzzles (based on your favorites) by hand, just for you.</p>
+    <p>You have orchestrated so many moments of play for me to enjoy over the years and I'm so grateful. This is my attempt to return the favor, even if it's just a fraction of all that you have gifted me. Plus, I did not want to make you eat another horribly dry dessert again (sorry about last year). I loved watching WALL-E together though. I would do that again. :-)</p>
+    <p>Anyway, I hope you'll like this more than the chocolate bread! I designed and wrote these puzzles, based on your favorites, just for you.</p>
+  </div>
+  <div class="sprite-row">
+    <div class="sprite" onclick="hopSprite(this)">
+    <svg viewBox="0 0 100 100" aria-label="WALL-E">
+      <rect x="6" y="70" width="40" height="20" rx="9" fill="#2b2b2b"/>
+      <rect x="54" y="70" width="40" height="20" rx="9" fill="#2b2b2b"/>
+      <rect x="14" y="36" width="72" height="38" rx="8" fill="#C9903F"/>
+      <rect x="14" y="48" width="72" height="5" fill="#A8722B"/>
+      <rect x="14" y="60" width="72" height="5" fill="#A8722B"/>
+      <rect x="42" y="20" width="16" height="18" fill="#9A9A9A"/>
+      <g transform="rotate(-8 50 20)">
+        <rect x="28" y="15" width="44" height="8" rx="4" fill="#B0B0B0"/>
+        <circle cx="32" cy="20" r="15" fill="#EDEDED"/>
+        <circle cx="68" cy="20" r="15" fill="#EDEDED"/>
+        <circle cx="34" cy="21" r="7" fill="#2b2b2b"/>
+        <circle cx="70" cy="21" r="7" fill="#2b2b2b"/>
+        <circle cx="36" cy="19" r="2" fill="#fff"/>
+        <circle cx="72" cy="19" r="2" fill="#fff"/>
+      </g>
+    </svg>
+    </div>
+    <div class="sprite" onclick="hopSprite(this)">
+    <svg viewBox="0 0 100 100" aria-label="EVE">
+      <ellipse cx="50" cy="94" rx="24" ry="5" fill="#7EC8E3" opacity="0.35"/>
+      <path d="M50,8 C72,8 88,26 88,44 C88,64 64,92 50,92 C36,92 12,64 12,44 C12,26 28,8 50,8 Z" fill="#F6F7F8"/>
+      <ellipse cx="38" cy="34" rx="13" ry="17" fill="#ffffff" opacity="0.6"/>
+      <rect x="20" y="34" width="60" height="18" rx="9" fill="#1B1B1B"/>
+      <ellipse cx="36" cy="43" rx="5" ry="6" fill="#2FA8E0"/>
+      <ellipse cx="64" cy="43" rx="5" ry="6" fill="#2FA8E0"/>
+    </svg>
+    </div>
   </div>
   <button class="begin-btn" onclick="window.location.href='suits-you.html'">Begin →</button>
   <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
@@ -83,5 +130,19 @@
     </div>
   </div>
 </div>
+<script>
+const greetedSprites = new Set();
+function hopSprite(el){
+  el.classList.remove('hopping');
+  void el.offsetWidth; // force reflow so the animation can retrigger
+  el.classList.add('hopping');
+
+  const label = el.querySelector('svg')?.getAttribute('aria-label');
+  if (label) greetedSprites.add(label);
+  if (greetedSprites.has('WALL-E') && greetedSprites.has('EVE')) {
+    window.PatAchievements.unlock('lavieenrose');
+  }
+}
+</script>
 </body>
 </html>

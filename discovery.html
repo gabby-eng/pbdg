@@ -108,6 +108,7 @@
     padding:6px 10px;border-radius:8px;white-space:nowrap;
   }
 
+  .cell.middle-row{background:rgba(255,216,115,0.07);}
   .cell.reveal{background:rgba(255,216,115,0.25);}
   .cell.reveal input{color:var(--gold-bright);font-weight:700;}
 
@@ -128,14 +129,15 @@
   }
   .win-banner p{color:var(--muted);font-family:'Space Mono',monospace;font-size:0.85rem;}
   .win-banner .prompt{margin-bottom:12px;}
-  .word-input{
-    font-family:'Space Mono',monospace;font-size:1.2rem;letter-spacing:0.2em;
+  .word-blanks{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+  .word-blank{
+    font-family:'Space Mono',monospace;font-size:1.2rem;
     text-align:center;text-transform:uppercase;
     background:var(--panel);border:2px solid var(--line);color:var(--gold-bright);
-    padding:10px 16px;border-radius:10px;outline:none;width:100%;max-width:260px;
+    width:34px;height:44px;border-radius:8px;outline:none;padding:0;
   }
-  .word-input:focus{border-color:var(--gold);}
-  .word-input.shake{animation:inputShake 0.35s ease;}
+  .word-blank:focus{border-color:var(--gold);}
+  .word-blank.shake{animation:inputShake 0.35s ease;}
   @keyframes inputShake{
     0%,100%{transform:translateX(0);}
     25%{transform:translateX(-6px);}
@@ -187,15 +189,34 @@ function devFillSolution(){
   grid = DEV_SOLUTION.map(row => row.slice());
   render();
 }
+function devFillStep(){
+  let total = 0;
+  for (let r=0;r<9;r++) for (let c=0;c<9;c++) if (!isGiven(r,c)) total++;
+  const perStep = Math.ceil(total / 9);
+  let filled = 0;
+  for (let r=0;r<9 && filled<perStep;r++){
+    for (let c=0;c<9 && filled<perStep;c++){
+      if (!isGiven(r,c) && !grid[r][c]){
+        grid[r][c] = DEV_SOLUTION[r][c];
+        filled++;
+      }
+    }
+  }
+  render();
+}
 function devUnsolve(){
   grid = GIVEN_PUZZLE.map(row => row.slice());
   wordConfirmed = false;
+  wordConfirmedAfterFullReveal = false;
+  wordGuess = Array(ANSWER_WORD.length).fill('');
   render();
 }
 
 const REVEAL_ROW = 4;
 const ANSWER_WORD = "DISCOVERY";
 let wordConfirmed = false;
+let wordConfirmedAfterFullReveal = false;
+let wordGuess = Array(ANSWER_WORD.length).fill('');
 
 let grid = GIVEN_PUZZLE.map(row => row.slice());
 
@@ -240,6 +261,16 @@ function isComplete(){
   return true;
 }
 
+function legendRevealProgress(){
+  let filled = 0, total = 0;
+  for (let r=0;r<9;r++) for (let c=0;c<9;c++){
+    if (isGiven(r,c)) continue;
+    total++;
+    if (grid[r][c]) filled++;
+  }
+  return total ? filled / total : 0;
+}
+
 let candidates = {}; // "r,c" -> Set of digits 1-9
 let selectedCell = null; // {r, c} or null
 let everUsedCandidates = false;
@@ -274,6 +305,7 @@ function render(){
       const classes = ['cell'];
       if (given) classes.push('given');
       if (conflicts.has(r+","+c)) classes.push('conflict');
+      if (r === REVEAL_ROW) classes.push('middle-row');
       if (solved && r === REVEAL_ROW) classes.push('reveal');
       if (selectedCell){
         const sameBox = Math.floor(r/3)===Math.floor(selectedCell.r/3) && Math.floor(c/3)===Math.floor(selectedCell.c/3);
@@ -314,30 +346,34 @@ function render(){
     ? ''
     : (complete ? "Something's off — check for conflicts." : "");
 
-  const legendHtml = solved
-    ? Object.entries(LEGEND).map(([d,l]) => `<span class="legend-pill">${d} = ${l}</span>`).join('')
-    : '';
+  const revealCount = wordConfirmed ? 9 : Math.min(9, Math.floor(legendRevealProgress() * 9));
+  const legendHtml = Object.entries(LEGEND).slice(0, revealCount)
+    .map(([d,l]) => `<span class="legend-pill">${d} = ${l}</span>`).join('');
 
   let winHtml = '';
-  if (solved && !wordConfirmed){
-    winHtml = `
-      <div class="win-banner">
-        <p class="prompt">Use the key to decode the middle row.</p>
-        <input class="word-input" id="word-guess" maxlength="20" placeholder="type the word"
-          oninput="this.value=this.value.toUpperCase()"
-          onkeydown="if(event.key==='Enter'){checkWordGuess()}">
-      </div>
-      <div class="legend-row">${legendHtml}</div>
-    `;
-  } else if (wordConfirmed){
+  if (wordConfirmed){
+    const victorySubtitle = wordConfirmedAfterFullReveal
+      ? 'Ta-da!'
+      : (complete ? '' : 'Well done! Please finish the grid to continue.');
     winHtml = `
       <div class="win-banner">
         <h2>DISC<span class="disco-ball" id="disco-ball" onclick="spinDiscoBall()">🪩</span>VERY</h2>
-        <div style="margin-top:10px;">
-          <a href="postscript.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--gold-bright);text-decoration:underline;">Next puzzle set →</a>
-        </div>
+        ${victorySubtitle ? `<p class="prompt">${victorySubtitle}</p>` : ''}
+        ${complete ? `
+          <div style="margin-top:10px;">
+            <a href="postscript.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--gold-bright);text-decoration:underline;">Next puzzle set →</a>
+          </div>
+        ` : ''}
       </div>
-      <div class="legend-row">${legendHtml}</div>
+      ${legendHtml ? `<div class="legend-row">${legendHtml}</div>` : ''}
+    `;
+  } else {
+    winHtml = `
+      <div class="win-banner">
+        <p class="prompt">The key will reveal itself as you fill out the grid.</p>
+        <div class="word-blanks">${renderWordBlanks()}</div>
+      </div>
+      ${legendHtml ? `<div class="legend-row">${legendHtml}</div>` : ''}
     `;
   }
 
@@ -345,7 +381,7 @@ function render(){
     <div class="header">
       <div class="eyebrow">Puzzles for Patrick</div>
       <h1>Oh? What's this?</h1>
-      <div class="sub">Funky electronic makes a lot of nightclubs come to light (9)</div>
+      <div class="sub">Can you figure out the hidden word before completing the grid?</div>
       <a href="a-long-time-ago.html" style="display:inline-block;margin-top:10px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-decoration:underline;">← Previous puzzle set</a>
       <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
         <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
@@ -364,22 +400,21 @@ function render(){
         </div>
       </div>
     </div>
-    <div class="board-wrap"><div class="board-frame"><div class="board">${boardHtml}</div>${wordConfirmed ? `<div class="sparkle-overlay">${sparkleHtml()}</div>` : ''}</div></div>
+    <div class="board-wrap"><div class="board-frame"><div class="board">${boardHtml}</div>${(wordConfirmed && complete) ? `<div class="sparkle-overlay">${sparkleHtml()}</div>` : ''}</div></div>
     <div class="status-note">${note}</div>
     ${winHtml}
     <div style="text-align:center;padding-top:14px;">
       <button onclick="devFillSolution()" style="font-family:'Space Mono',monospace;font-size:0.7rem;background:none;border:1px dashed var(--muted);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;">
         DEV: Fill Solution (remove before gifting)
       </button>
+      <button onclick="devFillStep()" style="font-family:'Space Mono',monospace;font-size:0.7rem;background:none;border:1px dashed var(--muted);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;margin-left:8px;">
+        DEV: Fill Step (remove before gifting)
+      </button>
       <button onclick="devUnsolve()" style="font-family:'Space Mono',monospace;font-size:0.7rem;background:none;border:1px dashed var(--muted);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;margin-left:8px;">
         DEV: Unsolve (remove before gifting)
       </button>
     </div>
   `;
-  if (solved && !wordConfirmed){
-    const wInput = document.getElementById('word-guess');
-    if (wInput) wInput.focus();
-  }
 }
 
 function onCellInput(el, r, c){
@@ -431,16 +466,46 @@ function onEmptyCellKeyDown(event, r, c){
   }
 }
 
+function renderWordBlanks(){
+  return wordGuess.map((ch, i) => `
+    <input class="word-blank" id="word-blank-${i}" maxlength="1" value="${ch}"
+      oninput="onWordBlankInput(this, ${i})"
+      onkeydown="onWordBlankKeyDown(event, ${i})">
+  `).join('');
+}
+
+function onWordBlankInput(el, i){
+  const v = el.value.replace(/[^a-zA-Z]/g, '').slice(-1).toUpperCase();
+  wordGuess[i] = v;
+  el.value = v;
+  if (v && i < wordGuess.length - 1){
+    const next = document.getElementById('word-blank-' + (i+1));
+    if (next) next.focus();
+  }
+  if (wordGuess.every(c => c)){
+    checkWordGuess();
+  }
+}
+
+function onWordBlankKeyDown(event, i){
+  if (event.key === 'Backspace' && !wordGuess[i] && i > 0){
+    event.preventDefault();
+    const prev = document.getElementById('word-blank-' + (i-1));
+    if (prev) prev.focus();
+  } else if (event.key === 'Enter'){
+    checkWordGuess();
+  }
+}
+
 function checkWordGuess(){
-  const input = document.getElementById('word-guess');
-  if (!input) return;
-  const val = input.value.trim().toUpperCase();
+  const val = wordGuess.join('');
   if (val === ANSWER_WORD){
+    wordConfirmedAfterFullReveal = legendRevealProgress() >= 1;
     wordConfirmed = true;
     render();
-  } else {
-    input.classList.add('shake');
-    setTimeout(() => input.classList.remove('shake'), 350);
+  } else if (val.length === ANSWER_WORD.length){
+    document.querySelectorAll('.word-blank').forEach(el => el.classList.add('shake'));
+    setTimeout(() => document.querySelectorAll('.word-blank').forEach(el => el.classList.remove('shake')), 350);
   }
 }
 

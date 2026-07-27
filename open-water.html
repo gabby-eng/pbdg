@@ -107,6 +107,27 @@
   .win-banner .small-note{font-size:0.7rem;opacity:0.75;margin-top:6px;font-style:italic;}
 
   @media (max-width:400px){ .header h1{font-size:1.6rem;} }
+
+  .shark-swim-layer{
+    position:fixed;left:0;top:0;width:100%;height:100%;
+    pointer-events:none;z-index:900;overflow:hidden;
+  }
+  .shark-swim{
+    position:absolute;top:28%;left:0;width:160px;height:auto;
+    image-rendering:pixelated;image-rendering:crisp-edges;shape-rendering:crispEdges;
+    animation:sharkSwimAcross 6s linear forwards, sharkBob 1.6s ease-in-out infinite;
+  }
+  @keyframes sharkSwimAcross{
+    from{transform:translateX(-220px);}
+    to{transform:translateX(calc(100vw + 220px));}
+  }
+  @keyframes sharkBob{
+    0%,100%{margin-top:0;}
+    50%{margin-top:14px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .shark-swim{animation:none;left:50%;transform:translateX(-50%);}
+  }
 </style>
 </head>
 <body>
@@ -135,8 +156,16 @@ const WORDS = {
     clue: "Muddled measurements of gold purity with alloy initially removed bare (5)",
     hintHtml: "<span class=\"hint-pink\">Muddled</span> <span class=\"hint-yellow\">measurements of gold purity</span> with <span class=\"hint-yellow\">alloy</span> <span class=\"hint-pink\">initially removed</span> <span class=\"hint-blue\">bare</span> (5)"
   },
-  whale: { word: "WHALE", clue: "The beginning to most questions with a robust and healthy curiosity makes for big tales to tell and beautiful sights to see (5)" },
-  shark: { word: "SHARK", clue: "Small and commanding attention, she is quick to deceive for the upper hand (5)" }
+  whale: {
+    word: "WHALE",
+    clue: "The beginning to most questions with a robust and healthy curiosity makes for big tales to tell and beautiful sights to see (5)",
+    hintHtml: "<span class=\"hint-yellow\">The beginning to most questions</span> with a <span class=\"hint-yellow\">robust and healthy</span> curiosity makes for <span class=\"hint-blue\">big tales to tell and beautiful sights to see</span> (5)"
+  },
+  shark: {
+    word: "SHARK",
+    clue: "Small and commanding attention, she is quick to deceive for the upper hand (5)",
+    hintHtml: "<span class=\"hint-yellow\">Small and commanding attention</span>, she is <span class=\"hint-blue\">quick to deceive for the upper hand</span> (5)"
+  }
 };
 
 let state = {
@@ -261,6 +290,18 @@ function fullChainValid(ids, order){
   return true;
 }
 
+function swimWhaleShark(){
+  const layer = document.createElement('div');
+  layer.className = 'shark-swim-layer';
+  layer.innerHTML = `
+    <svg class="shark-swim" viewBox="0 0 40 20" aria-label="whale shark">
+      <rect x="21" y="0" width="1" height="1" fill="#2F6E85"/><rect x="21" y="1" width="1" height="1" fill="#2F6E85"/><rect x="20" y="2" width="2" height="1" fill="#2F6E85"/><rect x="19" y="3" width="4" height="1" fill="#2F6E85"/><rect x="38" y="3" width="1" height="1" fill="#2F6E85"/><rect x="19" y="4" width="4" height="1" fill="#2F6E85"/><rect x="34" y="4" width="4" height="1" fill="#2F6E85"/><rect x="18" y="5" width="6" height="1" fill="#2F6E85"/><rect x="29" y="5" width="8" height="1" fill="#2F6E85"/><rect x="15" y="6" width="2" height="1" fill="#4A93AC"/><rect x="17" y="6" width="7" height="1" fill="#2F6E85"/><rect x="24" y="6" width="2" height="1" fill="#4A93AC"/><rect x="30" y="6" width="6" height="1" fill="#2F6E85"/><rect x="12" y="7" width="1" height="1" fill="#F2E9D8"/><rect x="13" y="7" width="2" height="1" fill="#4A93AC"/><rect x="15" y="7" width="1" height="1" fill="#F2E9D8"/><rect x="16" y="7" width="9" height="1" fill="#2F6E85"/><rect x="25" y="7" width="4" height="1" fill="#4A93AC"/><rect x="30" y="7" width="5" height="1" fill="#2F6E85"/><rect x="10" y="8" width="11" height="1" fill="#4A93AC"/><rect x="21" y="8" width="1" height="1" fill="#F2E9D8"/><rect x="22" y="8" width="5" height="1" fill="#4A93AC"/><rect x="27" y="8" width="1" height="1" fill="#F2E9D8"/><rect x="28" y="8" width="2" height="1" fill="#4A93AC"/><rect x="30" y="8" width="4" height="1" fill="#2F6E85"/><rect x="8" y="9" width="5" height="1" fill="#4A93AC"/><rect x="13" y="9" width="1" height="1" fill="#2C5D71"/><rect x="14" y="9" width="3" height="1" fill="#4A93AC"/><rect x="17" y="9" width="1" height="1" fill="#F2E9D8"/><rect x="18" y="9" width="7" height="1" fill="#4A93AC"/><rect x="25" y="9" width="1" height="1" fill="#F2E9D8"/><rect x="26" y="9" width="5" height="1" fill="#4A93AC"/><rect x="31" y="9" width="2" height="1" fill="#2F6E85"/><rect x="33" y="9" width="2" height="1" fill="#4A93AC"/><rect x="8" y="10" width="5" height="1" fill="#4A93AC"/><rect x="13" y="10" width="1" height="1" fill="#2C5D71"/><rect x="14" y="10" width="6" height="1" fill="#4A93AC"/><rect x="20" y="10" width="1" height="1" fill="#F2E9D8"/><rect x="21" y="10" width="10" height="1" fill="#4A93AC"/><rect x="31" y="10" width="1" height="1" fill="#2F6E85"/><rect x="32" y="10" width="3" height="1" fill="#4A93AC"/><rect x="7" y="11" width="3" height="1" fill="#D7E7E6"/><rect x="10" y="11" width="1" height="1" fill="#1A2224"/><rect x="11" y="11" width="2" height="1" fill="#D7E7E6"/><rect x="13" y="11" width="1" height="1" fill="#2C5D71"/><rect x="14" y="11" width="2" height="1" fill="#D7E7E6"/><rect x="16" y="11" width="13" height="1" fill="#4A93AC"/><rect x="29" y="11" width="1" height="1" fill="#2F6E85"/><rect x="30" y="11" width="1" height="1" fill="#4A93AC"/><rect x="31" y="11" width="1" height="1" fill="#2F6E85"/><rect x="32" y="11" width="3" height="1" fill="#4A93AC"/><rect x="8" y="12" width="8" height="1" fill="#D7E7E6"/><rect x="16" y="12" width="14" height="1" fill="#4A93AC"/><rect x="30" y="12" width="1" height="1" fill="#2F6E85"/><rect x="31" y="12" width="4" height="1" fill="#4A93AC"/><rect x="8" y="13" width="6" height="1" fill="#D7E7E6"/><rect x="14" y="13" width="1" height="1" fill="#2F6E85"/><rect x="15" y="13" width="15" height="1" fill="#D7E7E6"/><rect x="30" y="13" width="2" height="1" fill="#2F6E85"/><rect x="32" y="13" width="1" height="1" fill="#D7E7E6"/><rect x="8" y="14" width="5" height="1" fill="#33424A"/><rect x="13" y="14" width="1" height="1" fill="#D7E7E6"/><rect x="14" y="14" width="5" height="1" fill="#2F6E85"/><rect x="19" y="14" width="12" height="1" fill="#D7E7E6"/><rect x="31" y="14" width="3" height="1" fill="#2F6E85"/><rect x="12" y="15" width="2" height="1" fill="#D7E7E6"/><rect x="14" y="15" width="3" height="1" fill="#2F6E85"/><rect x="17" y="15" width="12" height="1" fill="#D7E7E6"/><rect x="31" y="15" width="4" height="1" fill="#2F6E85"/><rect x="13" y="16" width="3" height="1" fill="#2F6E85"/><rect x="16" y="16" width="10" height="1" fill="#D7E7E6"/><rect x="31" y="16" width="5" height="1" fill="#2F6E85"/><rect x="13" y="17" width="2" height="1" fill="#2F6E85"/><rect x="37" y="17" width="1" height="1" fill="#2F6E85"/><rect x="13" y="18" width="1" height="1" fill="#2F6E85"/><rect x="12" y="19" width="1" height="1" fill="#2F6E85"/>
+    </svg>
+  `;
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 6200);
+}
+
 function render(){
   const app = document.getElementById('app');
 
@@ -290,6 +331,7 @@ function render(){
   if (stage2Complete && !state.stage2WasComplete) {
     state.stage2WasComplete = true;
     if (!state.hintUsed) window.PatAchievements.unlock('noneed');
+    swimWhaleShark();
   }
 
   let rowsHtml = '';

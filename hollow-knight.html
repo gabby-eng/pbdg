@@ -208,6 +208,7 @@ const FADED_IDS = ["shade", "pale", "pantheons"];
 let state = {
   solved: {},
   hintsShown: {},
+  hintUsed: false,
   rearrangeStage: false,
   fadedOut: false,
   pantheonOrder: null,
@@ -403,6 +404,7 @@ function checkAnswer(id){
     if (!wasAllSolved && CLUES.every(c => state.solved[c.id])) {
       setTimeout(showRevealAnimation, 300);
       window.PatAchievements.unlock('grubnoises');
+      if (!state.hintUsed) window.PatAchievements.unlock('noneed');
     }
   } else {
     row.classList.add('shake');
@@ -413,6 +415,7 @@ function checkAnswer(id){
 function toggleHint(id){
   state.hintsShown[id] = !state.hintsShown[id];
   if (state.hintsShown[id]) {
+    state.hintUsed = true;
     window.PatAchievements.unlock('noshame');
   }
   render();

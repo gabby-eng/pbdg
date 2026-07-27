@@ -167,7 +167,9 @@ let state = {
   bonusRevealed: false,
   stage1WasComplete: false,
   justAdded: [],
-  hintsShown: {}
+  hintsShown: {},
+  hintUsed: false,
+  stage2WasComplete: false
 };
 
 function diffCount(a,b){
@@ -194,6 +196,7 @@ function checkAnswer(id){
 function toggleHint(id){
   state.hintsShown[id] = !state.hintsShown[id];
   if (state.hintsShown[id]) {
+    state.hintUsed = true;
     window.PatAchievements.unlock('noshame');
   }
   render();
@@ -305,6 +308,11 @@ function render(){
   const bonusSolved = state.bonusRevealed && allSolvedIn(bonusIds);
   const allIds = state.bonusRevealed ? [...baseIds, ...bonusIds] : baseIds;
   const stage2Complete = state.bonusRevealed && bonusSolved && fullChainValid(allIds, state.order);
+
+  if (stage2Complete && !state.stage2WasComplete) {
+    state.stage2WasComplete = true;
+    if (!state.hintUsed) window.PatAchievements.unlock('noneed');
+  }
 
   let rowsHtml = '';
   for (let i=0; i<state.order.length; i++){

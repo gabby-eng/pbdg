@@ -213,6 +213,7 @@ const SUIT_ICONS = {
 let state = {
   solved: {},
   hintsShown: {},
+  hintUsed: false,
 };
 
 function render(){
@@ -326,6 +327,7 @@ function checkAnswer(id){
 function toggleHint(id){
   state.hintsShown[id] = !state.hintsShown[id];
   if (state.hintsShown[id]) {
+    state.hintUsed = true;
     window.PatAchievements.unlock('noshame');
   }
   render();
@@ -358,6 +360,7 @@ function animateFlushReveal(input){
           state.solved['flush'] = true;
           render();
           window.PatAchievements.unlock('warmedup');
+          if (!state.hintUsed) window.PatAchievements.unlock('noneed');
           setTimeout(showFlushAnimation, 250);
         }, 300);
       }

@@ -330,7 +330,8 @@ function checkFlush(){
   const row = document.getElementById('card-flush');
   const input = row.querySelector('.tile-input');
   const val = normalizeAnswer(input.value);
-  if (val === FLUSH_CLUE.answer) {
+  const allCluesSolved = CLUES.every(c => state.solved[c.id]);
+  if (val === FLUSH_CLUE.answer && allCluesSolved) {
     input.disabled = true;
     animateFlushReveal(input);
   } else {

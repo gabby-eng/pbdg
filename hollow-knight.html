@@ -234,7 +234,7 @@ function render(){
     <div class="clue-list">
       ${clueCards}
     </div>
-    ${state.solved['pantheons'] ? `
+    ${CLUES.every(c => state.solved[c.id]) ? `
       <div style="text-align:center;margin-top:26px;">
         <a href="digit-ladder.html" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">Next puzzle set →</a>
       </div>

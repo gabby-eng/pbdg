@@ -15,7 +15,8 @@
     { id: "sharpeye", title: "Sharp Eye", sub: "Click on the pantheons in order." },
     { id: "candidatenotation", title: "I Hope You Appreciated That", sub: "Candidate notation utilized." },
     { id: "lockedin", title: "Locked In", sub: "Complete the sudoku without placing a single pencil-mark candidate." },
-    { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." }
+    { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." },
+    { id: "noshame", title: "No Shame", sub: "Use a hint for the first time." }
   ];
 
   function loadUnlockedIds(){
@@ -92,7 +93,7 @@
         font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;
         color:var(--gold, #E8B84B);margin-bottom:10px;
       }
-      .achv-list{max-height:480px;overflow-y:auto;overflow-x:hidden;margin-right:-6px;padding-right:6px;}
+      .achv-list{max-height:336px;overflow-y:auto;overflow-x:hidden;margin-right:-6px;padding-right:6px;}
       .achv-list::-webkit-scrollbar{width:6px;}
       .achv-list::-webkit-scrollbar-track{background:transparent;}
       .achv-list::-webkit-scrollbar-thumb{background:var(--line, #1F6B52);border-radius:3px;}

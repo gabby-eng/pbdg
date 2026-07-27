@@ -18,7 +18,8 @@
     { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." },
     { id: "noshame", title: "No Shame", sub: "Use a hint for the first time." },
     { id: "noneed", title: "No Need", sub: "Complete a page without using any hints." },
-    { id: "lavieenrose", title: "La Vie En Rose", sub: "Say hello to WALL-E and EVE." }
+    { id: "lavieenrose", title: "La Vie En Rose", sub: "Say hello to WALL-E and EVE." },
+    { id: "didyounotice", title: "Did You Like The Gimmick?", sub: "Complete the Postletter crossword." }
   ];
 
   function loadUnlockedIds(){

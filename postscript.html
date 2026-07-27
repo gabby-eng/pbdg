@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Postscript</title>
+<title>Postletter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -76,6 +76,8 @@
   .cell.active-word{background:rgba(126,200,227,0.18);}
   .cell.active-cell{background:rgba(255,216,115,0.32);}
   .cell.wrong-flash input{color:var(--error);}
+  .cell.gimmick-cell{background:rgba(255,216,115,0.4);box-shadow:inset 0 0 0 2px var(--gold-bright);}
+  .cell.gimmick-cell input{color:var(--gold-bright);}
 
   .sparkle-overlay{position:absolute;inset:0;pointer-events:none;}
   .sparkle{
@@ -118,6 +120,7 @@
   .clue-item:hover{background:var(--panel-alt);}
   .clue-item.active{background:rgba(255,216,115,0.18);color:var(--gold-bright);}
   .clue-item.filled{color:var(--muted);}
+  .clue-item.gimmick{background:rgba(255,216,115,0.22);color:var(--gold-bright);font-weight:700;}
   .clue-item .cnum{font-family:'Space Mono',monospace;font-weight:700;flex-shrink:0;min-width:20px;}
 
   .dev-buttons{text-align:center;padding-top:18px;}
@@ -137,7 +140,7 @@
 <div id="app"></div>
 
 <script>
-const PUZZLE = {"grid":[["I","B","#","A","S","Y","O","U","W","I","S","H","#","X","M"],["S","O","D","#","O","#","#","P","E","O","N","Y","#","O","A"],["T","W","E","E","N","E","R","S","#","T","#","M","O","#","J"],["H","S","A","#","#","#","U","E","#","C","A","N","T","G","O"],["M","E","R","C","H","A","N","T","S","#","Q","A","T","A","R"],["U","R","#","H","#","#","#","#","T","R","I","L","O","B","E"],["S","#","P","I","#","B","A","#","O","I","#","#","M","B","D"],["#","H","A","P","P","Y","B","I","R","T","H","D","A","Y","#"],["G","O","T","#","#","N","A","#","M","E","#","E","N","#","C"],["A","P","R","I","C","O","T","#","#","#","#","K","#","F","E"],["M","O","I","S","T","#","E","P","H","E","M","E","R","A","L"],["E","N","C","O","R","E","#","I","O","#","#","#","E","E","E"],["B","#","K","B","#","W","#","S","T","R","I","K","E","R","S"],["O","W","#","A","S","A","W","A","#","#","C","#","F","I","T"],["Y","O","#","R","U","N","A","N","D","B","U","N","#","E","E"]],"positions":{"1":[0,0],"2":[0,1],"3":[0,3],"4":[0,4],"5":[0,7],"6":[0,8],"7":[0,9],"8":[0,10],"9":[0,11],"10":[0,13],"11":[0,14],"12":[1,0],"13":[1,2],"14":[1,7],"15":[1,13],"16":[2,0],"17":[2,6],"18":[2,11],"19":[2,12],"20":[3,0],"21":[3,6],"22":[3,9],"23":[3,10],"24":[3,13],"25":[4,0],"26":[4,3],"27":[4,8],"28":[4,10],"29":[5,0],"30":[5,8],"31":[5,9],"32":[6,2],"33":[6,5],"34":[6,6],"35":[6,8],"36":[6,12],"37":[7,1],"38":[7,11],"39":[8,0],"40":[8,5],"41":[8,8],"42":[8,11],"43":[8,14],"44":[9,0],"45":[9,3],"46":[9,4],"47":[9,13],"48":[10,0],"49":[10,6],"50":[10,7],"51":[10,8],"52":[10,12],"53":[11,0],"54":[11,5],"55":[11,7],"56":[11,12],"57":[12,2],"58":[12,7],"59":[12,10],"60":[13,0],"61":[13,1],"62":[13,3],"63":[13,4],"64":[13,6],"65":[13,12],"66":[14,0],"67":[14,3],"68":[14,13]},"across_answers":{"1":"IB","3":"ASYOUWISH","10":"XM","12":"SOD","14":"PEONY","15":"OA","16":"TWEENERS","18":"MO","20":"HSA","21":"UE","22":"CANTGO","25":"MERCHANTS","28":"QATAR","29":"UR","30":"TRILOBE","32":"PI","33":"BA","35":"OI","36":"MBD","37":"HAPPYBIRTHDAY","39":"GOT","40":"NA","41":"ME","42":"EN","44":"APRICOT","47":"FE","48":"MOIST","49":"EPHEMERAL","53":"ENCORE","55":"IO","56":"EEE","57":"KB","58":"STRIKERS","60":"OW","62":"ASAWA","65":"FIT","66":"YO","67":"RUNANDBUN","68":"EE"},"down_answers":{"1":"ISTHMUS","2":"BOWSER","4":"SON","5":"UPSET","6":"WE","7":"IOTC","8":"SN","9":"HYMNAL","10":"XO","11":"MAJORED","13":"DEAR","17":"RUN","19":"OTTOMAN","23":"AQI","24":"GABBY","26":"CHIP","27":"STORM","31":"RITE","32":"PATRICK","33":"BYNO","34":"ABATE","37":"HOPON","38":"DEKE","39":"GAMEBOY","43":"CELESTE","45":"ISOBAR","46":"CTR","47":"FAERIE","50":"PISAN","51":"HOT","52":"REEF","54":"EWAN","59":"ICU","61":"WO","63":"SU","64":"WA"},"across_clues":{"1":"A non-profit organization headquartered in Geneva that offers rigorous high school curriculum, in short","3":"Famous line from Gabby's favorite movie","10":"Type of radio","12":"Turf grass with roots","14":"Spring bloomer","15":"A common form of arthritis, abbr.","16":"What you sometimes do when we play spikeball","18":"Start to a famous song by The Notorious B.I.G.","20":"Employee benefit option, for short","21":"Where we made Voidwell, in short","22":"Terse turndown to an invitation","25":"Potion sellas","28":"2022 World Cup host","29":"An ancient city-state in Mesopotamia, famous for its Great Ziggurat","30":"Object with three round projections","32":"The reason for Strawberry Rhubarb on March 14","33":"Type of degree, briefly","35":"\"Olly olly olly, ___ ___ ___!\"","36":"\"My bad, oddly an apology in short\" (3)","37":"Letter content","39":"Fooled","40":"#___1","41":"*Silly voice candidate*","42":"Half of the shorthand for","44":"Your pick for a perfectly ripe fruit","47":"Frontend or iron, in brief","48":"Opposite of the chocolate bread Gabby made for your birthday last year","49":"Fleeting","53":"\"Again! Again!\" *claps hands like a 5-year old*","55":"Top-level domain for your blog","56":"Shoebox letter","57":"A thousand bytes, in short","58":"Petey Piranha and a haunt of Boos can be found in this game","60":"\"That hurt!\"","62":"\"Spouse\" sa Tagalog","65":"Tantrum","66":"Short greeting","67":"The reason to wait for a Basculegion SIR","68":"Half of the Electrical Engineering and Computer Sciences at Cal"},"down_clues":{"1":"Geographical neck","2":"King Koopa","4":"Luke to Darth Vader","5":"Unexpected win","6":"*Silly voice candidate*","7":"An intergovernmental organization that manages certain marine life in a specific body of water, abbr.","8":"___ to Riot ID project, in short","9":"Church songbook","10":"Letter closer","11":"Specialized (in)","13":"Letter opener","17":"Skier's spot","19":"Nap square!","23":"The reason for our trip to Newport in January 2025","24":"Letter sender","26":"LT in 58-Across","27":"Tempest","31":"Ceremony","32":"Letter recipient","33":"___ means (certainly not)","34":"Lessen","37":"Cyclist's offer","38":"RB with the ball in 58-Across","39":"First console for Pokémon","43":"Challenging game with 3-sides","45":"Meteorologist's line","46":"Lincoln or Rockefeller: abbr.","47":"Trait from Set 12 that granted the Queenguard's Armor","50":"Fibonacci, for one","51":"In","52":"Atoll protector","54":"First name of a famous Obi-Wan-er","59":"Post-op stop","61":"___ bist du? Hier!","63":"Short for State University","64":"Home state to the largest ferry system in the U.S."}};
+const PUZZLE = {"grid":[["I","B","#","A","S","Y","O","U","W","I","S","H","#","X","M"],["S","O","D","#","O","#","#","P","E","O","N","Y","#","O","A"],["T","W","E","E","N","E","R","S","#","T","#","M","O","#","J"],["H","S","A","#","#","#","U","E","#","C","A","N","T","G","O"],["M","E","R","C","H","A","N","T","S","#","Q","A","T","A","R"],["U","R","#","H","#","#","#","#","T","R","I","L","O","B","E"],["S","#","P","I","#","B","A","#","O","I","#","#","M","B","D"],["#","H","A","P","P","Y","B","I","R","T","H","D","A","Y","#"],["G","O","T","#","#","N","A","#","M","E","#","E","N","#","C"],["A","P","R","I","C","O","T","#","#","#","#","K","#","F","E"],["M","O","I","S","T","#","E","P","H","E","M","E","R","A","L"],["E","N","C","O","R","E","#","I","O","#","#","#","E","E","E"],["B","#","K","B","#","W","#","S","T","R","I","K","E","R","S"],["O","W","#","A","S","A","W","A","#","#","C","#","F","I","T"],["Y","O","#","R","U","N","A","N","D","B","U","N","#","E","E"]],"positions":{"1":[0,0],"2":[0,1],"3":[0,3],"4":[0,4],"5":[0,7],"6":[0,8],"7":[0,9],"8":[0,10],"9":[0,11],"10":[0,13],"11":[0,14],"12":[1,0],"13":[1,2],"14":[1,7],"15":[1,13],"16":[2,0],"17":[2,6],"18":[2,11],"19":[2,12],"20":[3,0],"21":[3,6],"22":[3,9],"23":[3,10],"24":[3,13],"25":[4,0],"26":[4,3],"27":[4,8],"28":[4,10],"29":[5,0],"30":[5,8],"31":[5,9],"32":[6,2],"33":[6,5],"34":[6,6],"35":[6,8],"36":[6,12],"37":[7,1],"38":[7,11],"39":[8,0],"40":[8,5],"41":[8,8],"42":[8,11],"43":[8,14],"44":[9,0],"45":[9,3],"46":[9,4],"47":[9,13],"48":[10,0],"49":[10,6],"50":[10,7],"51":[10,8],"52":[10,12],"53":[11,0],"54":[11,5],"55":[11,7],"56":[11,12],"57":[12,2],"58":[12,7],"59":[12,10],"60":[13,0],"61":[13,1],"62":[13,3],"63":[13,4],"64":[13,6],"65":[13,12],"66":[14,0],"67":[14,3],"68":[14,13]},"across_answers":{"1":"IB","3":"ASYOUWISH","10":"XM","12":"SOD","14":"PEONY","15":"OA","16":"TWEENERS","18":"MO","20":"HSA","21":"UE","22":"CANTGO","25":"MERCHANTS","28":"QATAR","29":"UR","30":"TRILOBE","32":"PI","33":"BA","35":"OI","36":"MBD","37":"HAPPYBIRTHDAY","39":"GOT","40":"NA","41":"ME","42":"EN","44":"APRICOT","47":"FE","48":"MOIST","49":"EPHEMERAL","53":"ENCORE","55":"IO","56":"EEE","57":"KB","58":"STRIKERS","60":"OW","62":"ASAWA","65":"FIT","66":"YO","67":"RUNANDBUN","68":"EE"},"down_answers":{"1":"ISTHMUS","2":"BOWSER","4":"SON","5":"UPSET","6":"WE","7":"IOTC","8":"SN","9":"HYMNAL","10":"XO","11":"MAJORED","13":"DEAR","17":"RUN","19":"OTTOMAN","23":"AQI","24":"GABBY","26":"CHIP","27":"STORM","31":"RITE","32":"PATRICK","33":"BYNO","34":"ABATE","37":"HOPON","38":"DEKE","39":"GAMEBOY","43":"CELESTE","45":"ISOBAR","46":"CTR","47":"FAERIE","50":"PISAN","51":"HOT","52":"REEF","54":"EWAN","59":"ICU","61":"WO","63":"SU","64":"WA"},"across_clues":{"1":"A non-profit organization headquartered in Geneva that offers rigorous high school curriculum, in short","3":"Famous line from Gabby's favorite movie","10":"Type of radio","12":"Turf grass with roots","14":"Spring bloomer","15":"A common form of arthritis, abbr.","16":"What you sometimes do when we play spikeball","18":"Start to a famous song by The Notorious B.I.G.","20":"Employee benefit option, for short","21":"Where we made Voidwell, in short","22":"Terse turndown to an invitation","25":"Potion sellas","28":"2022 World Cup host","29":"An ancient city-state in Mesopotamia, famous for its Great Ziggurat","30":"Object with three round projections","32":"The reason for Strawberry Rhubarb on March 14","33":"Type of degree, briefly","35":"\"Olly olly olly, ___ ___ ___!\"","36":"\"My bad, oddly an apology in short\" (3)","37":"Letter content","39":"Fooled","40":"#___1","41":"*Silly voice candidate*","42":"Half of the locale code for English in the Unit. States","44":"Your pick for a perfectly ripe fruit","47":"Frontend or iron, in brief","48":"Opposite of the chocolate bread Gabby made for your birthday last year","49":"Fleeting","53":"\"Again! Again!\" *claps hands like a 5-year old*","55":"Top-level domain for your blog","56":"Triple-wide width for shoes","57":"A thousand bytes, in short","58":"Petey Piranha and a haunt of Boos can be found in this game","60":"\"That hurt!\"","62":"\"Spouse\" sa Tagalog","65":"Tantrum","66":"Short greeting","67":"The reason to wait for a Basculegion SIR","68":"Half of the Electrical Engineering and Computer Sciences at Cal"},"down_clues":{"1":"Geographical neck","2":"King Koopa","4":"Luke to Darth Vader","5":"Unexpected win","6":"*Silly voice candidate*","7":"An intergovernmental organization that manages certain marine life in a specific body of water, abbr.","8":"___ to Riot ID project, in short","9":"Church songbook","10":"Letter closer","11":"Specialized (in)","13":"Letter opener","17":"Skier's spot","19":"Nap square!","23":"The reason for our trip to Newport in January 2025","24":"Letter sender","26":"LT in 58-Across","27":"Tempest","31":"Ceremony","32":"Letter recipient","33":"___ means (certainly not)","34":"Lessen","37":"Cyclist's offer","38":"RB with the ball in 58-Across","39":"First console for Pokémon","43":"Challenging game with 3-sides","45":"Meteorologist's line","46":"Lincoln or Rockefeller: abbr.","47":"Trait from Set 12 that granted the Queenguard's Armor","50":"Fibonacci, for one","51":"In","52":"Atoll protector","54":"First name of a famous Obi-Wan-er","59":"Post-op stop","61":"___ bist du? Hier!","63":"Short for State University","64":"Home state to the largest ferry system in the U.S."}};
 
 const N = 15;
 const GRID_SOLUTION = PUZZLE.grid;
@@ -179,6 +182,63 @@ for (let r=0;r<N;r++){
 let selected = null; // {r,c}
 let direction = 'across'; // or 'down'
 let wordConfirmed = false;
+let gimmickRevealed = false;
+let gimmickStep = 0;
+let gimmickAnimating = false;
+
+// The secret message hiding in the grid: DEAR (13D) PATRICK (32D) HAPPYBIRTHDAY (37A) XO (10D) GABBY (24D)
+const GIMMICK_CLUES = [
+  { num: "13", dir: "down" },
+  { num: "32", dir: "down" },
+  { num: "37", dir: "across" },
+  { num: "10", dir: "down" },
+  { num: "24", dir: "down" }
+];
+
+const GIMMICK_LETTER_DELAY = 180; // ms between each letter reveal within a clue
+const GIMMICK_CLUE_PAUSE = 550; // extra ms pause after finishing a clue
+
+let gimmickSequenceCache = null;
+function getGimmickSequence(){
+  if (!gimmickSequenceCache){
+    gimmickSequenceCache = [];
+    GIMMICK_CLUES.forEach((g, idx) => {
+      wordCells(g.num, g.dir).forEach(([r,c]) => {
+        gimmickSequenceCache.push({ key: r+','+c, clueIdx: idx });
+      });
+    });
+  }
+  return gimmickSequenceCache;
+}
+
+function isGimmickClueRevealed(numStr, dir){
+  const idx = GIMMICK_CLUES.findIndex(g => g.num === numStr && g.dir === dir);
+  if (idx === -1) return false;
+  const seq = getGimmickSequence();
+  let lastIdxOfClue = -1;
+  for (let i=0;i<seq.length;i++) if (seq[i].clueIdx === idx) lastIdxOfClue = i;
+  return gimmickStep > lastIdxOfClue;
+}
+
+function startGimmickReveal(){
+  if (gimmickAnimating) return;
+  gimmickAnimating = true;
+  const seq = getGimmickSequence();
+  let i = gimmickStep;
+  function revealNext(){
+    if (i >= seq.length){
+      gimmickAnimating = false;
+      setTimeout(() => { gimmickRevealed = true; render(); }, 400);
+      return;
+    }
+    gimmickStep = i + 1;
+    render();
+    const isLastOfClue = (i === seq.length - 1) || (seq[i+1].clueIdx !== seq[i].clueIdx);
+    i++;
+    setTimeout(revealNext, isLastOfClue ? GIMMICK_LETTER_DELAY + GIMMICK_CLUE_PAUSE : GIMMICK_LETTER_DELAY);
+  }
+  revealNext();
+}
 
 function devFillSolution(){
   for (let r=0;r<N;r++){
@@ -194,6 +254,10 @@ function devUnsolve(){
       userGrid[r][c] = '';
     }
   }
+  wordConfirmed = false;
+  gimmickRevealed = false;
+  gimmickStep = 0;
+  gimmickAnimating = false;
   render();
 }
 
@@ -370,11 +434,16 @@ function render(){
   const app = document.getElementById('app');
   const complete = isComplete();
   const solved = complete && isFullyCorrect();
+  if (solved && !wordConfirmed){
+    window.PatAchievements.unlock('didyounotice');
+    setTimeout(startGimmickReveal, 500);
+  }
   if (solved) wordConfirmed = true;
 
   const activeNum = activeClueNum();
   const activeCells = (selected && activeNum) ? wordCells(activeNum, direction).map(p=>p.join(',')) : [];
   const selKey = selected ? selected.r+','+selected.c : null;
+  const gimmickCells = solved ? new Set(getGimmickSequence().slice(0, gimmickStep).map(x => x.key)) : new Set();
 
   let boardHtml = '';
   for (let r=0;r<N;r++){
@@ -387,6 +456,7 @@ function render(){
       const classes = ['cell'];
       if (activeCells.includes(key)) classes.push('active-word');
       if (selKey === key) classes.push('active-cell');
+      if (gimmickCells.has(key)) classes.push('gimmick-cell');
       const num = cellNumber[key];
       const val = userGrid[r][c] || '';
       boardHtml += `<div class="${classes.join(' ')}">
@@ -418,7 +488,8 @@ function render(){
         if (!userGrid[rr][cc]) { filled = false; break; }
       }
       const isActive = activeNum === numStr && direction === dir;
-      return `<div class="clue-item ${isActive?'active':''} ${filled?'filled':''}" onclick="selectClue('${numStr}','${dir}')">
+      const isGimmick = solved && isGimmickClueRevealed(numStr, dir);
+      return `<div class="clue-item ${isActive?'active':''} ${filled?'filled':''} ${isGimmick?'gimmick':''}" onclick="selectClue('${numStr}','${dir}')">
         <span class="cnum">${numStr}.</span><span>${clues[numStr]}</span>
       </div>`;
     }).join('');
@@ -428,16 +499,19 @@ function render(){
 
   const winHtml = solved ? `
     <div class="win-banner">
-      <h2>Solved!</h2>
-      <p>Every square, right where it belongs.</p>
+      <h2>Signed, sealed, delivered!</h2>
+      ${gimmickRevealed ? `
+        <div style="margin-top:14px;">
+          <a href="a-note-for-you.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--gold-bright);text-decoration:underline;">Continue →</a>
+        </div>
+      ` : ''}
     </div>
   ` : '';
 
   app.innerHTML = `
     <div class="header">
       <div class="eyebrow">Puzzles for Patrick</div>
-      <h1>Postscript</h1>
-      <div class="sub">A little something extra, before we keep going.</div>
+      <h1>Postletter</h1>
       <a href="discovery.html" style="display:inline-block;margin-top:10px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-decoration:underline;">← Previous puzzle set</a>
       <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
         <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>

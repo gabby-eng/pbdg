@@ -51,6 +51,7 @@
   }
   .clue-card.solved{border-color:var(--gold);background:linear-gradient(145deg,#16513e,#0F4A38);}
   .clue-card.locked{opacity:0.4;pointer-events:none;}
+  .clue-card.fade-out{opacity:0;transform:scale(0.96);}
   .clue-text{font-size:0.95rem;line-height:1.45;margin-bottom:10px;}
   .answer-row{display:flex;gap:10px;align-items:center;}
   .tile-input{
@@ -78,6 +79,26 @@
     font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);
     text-align:center;margin-top:20px;
   }
+
+  .rearrange-note{
+    font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--gold-bright);
+    text-align:center;margin:4px 22px 14px;
+  }
+
+  .clue-row{display:flex;flex-direction:column;transition:transform 0.15s ease;}
+  .clue-row .clue-card{display:flex;align-items:center;gap:12px;}
+  .clue-row .clue-main{flex:1;min-width:0;}
+  .drag-handle{
+    width:24px;height:100%;min-height:36px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:1.1rem;letter-spacing:2px;
+    cursor:grab;touch-action:none;user-select:none;border-radius:6px;
+  }
+  .drag-handle:hover{color:var(--gold-bright);background:rgba(255,216,115,0.08);}
+  .clue-row.dragging{position:relative;z-index:50;}
+  .clue-row.dragging .clue-card{box-shadow:0 12px 28px rgba(0,0,0,0.5);border-color:var(--gold-bright);cursor:grabbing;}
+  .clue-row.drop-before{border-top:2px solid var(--gold-bright);}
+  .clue-row.drop-after{border-bottom:2px solid var(--gold-bright);}
 
   /* ---------- REVEAL OVERLAY ---------- */
   #reveal-overlay{
@@ -116,7 +137,7 @@
 <div id="reveal-overlay">
   <div class="reveal-title">OF COURSE THERE WOULD BE HOLLOW KNIGHT</div>
   <div class="reveal-sub">And no, I still haven't completed the Pantheon of the Sage LOL</div>
-  <button class="replay-btn" onclick="closeReveal()">Back to puzzle</button>
+  <button class="replay-btn" onclick="closeReveal()">Hmm?</button>
   <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;opacity:0;animation:titleIn 0.6s ease 1.2s forwards;text-decoration:underline;">Next puzzle set →</a>
 </div>
 
@@ -132,9 +153,9 @@ const CLUES = [
   {
     id: "shade",
     word: "SHADE",
-    clue: "Shelter from swelter means you can cross out crazy deaths! (5)",
-    hint: "Anagram of DEATHS (crazy), then remove T (cross)",
-    hintHtml: "<span class=\"hint-blue\">Shelter from swelter</span> means you can <span class=\"hint-pink\">cross out crazy</span> <span class=\"hint-yellow\">deaths</span>! (5)"
+    clue: "Shelter from swelter means you can cross out deaths carelessly (5)",
+    hint: "Anagram of DEATHS (carelessly), then remove T (cross)",
+    hintHtml: "<span class=\"hint-blue\">Shelter from swelter</span> means you can <span class=\"hint-pink\">cross out</span> <span class=\"hint-yellow\">deaths</span> <span class=\"hint-pink\">carelessly</span> (5)"
   },
   {
     id: "sage",
@@ -142,6 +163,13 @@ const CLUES = [
     clue: "A churrascaria sausage hides a fragrant herb (4)",
     hint: "Hidden word: sauSAGE",
     hintHtml: "A churrascaria <span class=\"hint-yellow\">sausage</span> <span class=\"hint-pink\">hides</span> <span class=\"hint-blue\">a fragrant herb</span> (4)"
+  },
+  {
+    id: "knight",
+    word: "KNIGHT",
+    clue: "A solemn warrior bears the cost as battles of tooth and nail echo the evening (6)",
+    hint: "Homophone: 'the evening' = NIGHT, which sounds like KNIGHT (silent K)",
+    hintHtml: "A <span class=\"hint-blue\">solemn warrior</span> bears the cost as battles of tooth and nail <span class=\"hint-pink\">echo</span> <span class=\"hint-yellow\">the evening</span> (6)"
   },
   {
     id: "master",
@@ -156,13 +184,6 @@ const CLUES = [
     clue: "A sorry, jumbled plea... how weak (4)",
     hint: "Anagram of PLEA",
     hintHtml: "A sorry, <span class=\"hint-pink\">jumbled</span> <span class=\"hint-yellow\">plea</span>... how <span class=\"hint-blue\">weak</span> (4)"
-  },
-  {
-    id: "knight",
-    word: "KNIGHT",
-    clue: "A solemn warrior bears the cost as battles of tooth and nail echo the evening (6)",
-    hint: "Homophone: 'the evening' = NIGHT, which sounds like KNIGHT (silent K)",
-    hintHtml: "A <span class=\"hint-blue\">solemn warrior</span> bears the cost as battles of tooth and nail <span class=\"hint-pink\">echo</span> <span class=\"hint-yellow\">the evening</span> (6)"
   },
   {
     id: "hallownest",
@@ -182,33 +203,68 @@ const CLUES = [
 
 const PANTHEON_ORDER = ["master", "artist", "sage", "knight", "hallownest"];
 
+const FADED_IDS = ["shade", "pale", "pantheons"];
+
 let state = {
   solved: {},
   hintsShown: {},
-  pantheonClicks: [],
+  rearrangeStage: false,
+  fadedOut: false,
+  pantheonOrder: null,
+  pantheonWin: false,
 };
 
 function render(){
   const app = document.getElementById('app');
 
-  let clueCards = CLUES.map(c => {
-    const isSolved = state.solved[c.id];
-    const placeholder = Array(c.word.length).fill('_').join(' ');
-    return `
-      <div class="clue-card ${isSolved ? 'solved' : ''}" id="card-${c.id}">
-        <div class="clue-text">${(!isSolved && state.hintsShown[c.id] && c.hintHtml) ? c.hintHtml : c.clue}</div>
-        ${(!isSolved && c.hintHtml) ? `<button class="hint-btn" onclick="toggleHint('${c.id}')">${state.hintsShown[c.id] ? 'Hide hint' : 'Show hint'}</button>` : ''}
-        <div class="answer-row">
-          <input class="tile-input" maxlength="${c.word.length}" placeholder="${placeholder}"
-            value="${isSolved ? c.word : ''}"
-            ${isSolved ? 'disabled' : ''}
-            oninput="this.value=this.value.toUpperCase()"
-            onkeydown="if(event.key==='Enter'){checkAnswer('${c.id}')}">
-          <span class="check-icon">${isSolved ? '✓' : ''}</span>
+  const allSolved = CLUES.every(c => state.solved[c.id]);
+
+  if (allSolved && state.fadedOut && !state.pantheonOrder) {
+    state.pantheonOrder = CLUES.map(c => c.id).filter(id => PANTHEON_ORDER.includes(id));
+  }
+
+  let clueCards;
+
+  if (allSolved && state.fadedOut) {
+    // Rearrange stage: only the 5 pantheon cards remain, and they're draggable.
+    clueCards = state.pantheonOrder.map(id => {
+      const c = CLUES.find(cc => cc.id === id);
+      return `
+        <div class="clue-row" id="row-${id}">
+          <div class="clue-card solved" id="card-${id}">
+            <div class="drag-handle" onpointerdown="onDragStart(event, '${id}')">⋮⋮</div>
+            <div class="clue-main">
+              <div class="clue-text">${c.clue}</div>
+              <div class="answer-row">
+                <input class="tile-input" maxlength="${c.word.length}" value="${c.word}" disabled>
+              </div>
+            </div>
+            <span class="check-icon">✓</span>
+          </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  } else {
+    clueCards = CLUES.map(c => {
+      const isSolved = state.solved[c.id];
+      const placeholder = Array(c.word.length).fill('_').join(' ');
+      const fading = allSolved && state.rearrangeStage && FADED_IDS.includes(c.id);
+      return `
+        <div class="clue-card ${isSolved ? 'solved' : ''} ${fading ? 'fade-out' : ''}" id="card-${c.id}">
+          <div class="clue-text">${(!isSolved && state.hintsShown[c.id] && c.hintHtml) ? c.hintHtml : c.clue}</div>
+          ${(!isSolved && c.hintHtml) ? `<button class="hint-btn" onclick="toggleHint('${c.id}')">${state.hintsShown[c.id] ? 'Hide hint' : 'Show hint'}</button>` : ''}
+          <div class="answer-row">
+            <input class="tile-input" maxlength="${c.word.length}" placeholder="${placeholder}"
+              value="${isSolved ? c.word : ''}"
+              ${isSolved ? 'disabled' : ''}
+              oninput="this.value=this.value.toUpperCase()"
+              onkeydown="if(event.key==='Enter'){checkAnswer('${c.id}')}">
+            <span class="check-icon">${isSolved ? '✓' : ''}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
   app.innerHTML = `
     <div class="header">
@@ -233,10 +289,16 @@ function render(){
         </div>
       </div>
     </div>
+    ${(state.rearrangeStage && !state.pantheonWin) ? `
+      <div class="rearrange-note">Weird that these Pantheons are out of order...</div>
+    ` : ''}
     <div class="clue-list">
       ${clueCards}
     </div>
-    ${CLUES.every(c => state.solved[c.id]) ? `
+    ${state.pantheonWin ? `
+      <div class="rearrange-note">Ahhh. Better.</div>
+    ` : ''}
+    ${allSolved ? `
       <div style="text-align:center;margin-top:26px;">
         <a href="digit-ladder.html" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">Next puzzle set →</a>
       </div>
@@ -253,26 +315,80 @@ function render(){
       }
     }
   });
+}
 
-  if (CLUES.every(c => state.solved[c.id])) {
-    PANTHEON_ORDER.forEach(id => {
-      const row = document.getElementById(`card-${id}`);
-      if (row) row.addEventListener('click', () => handlePantheonClick(id));
-    });
+function arraysEqual(a, b){
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
+let dragState = null;
+
+function onDragStart(ev, id){
+  ev.preventDefault();
+  const rowEl = document.getElementById(`row-${id}`);
+  const snapshot = state.pantheonOrder.map(pid => {
+    const el = document.getElementById(`row-${pid}`);
+    const r = el.getBoundingClientRect();
+    return { id: pid, top: r.top, height: r.height, centerY: r.top + r.height/2 };
+  });
+  dragState = {
+    id, rowEl,
+    startY: ev.clientY,
+    startRect: rowEl.getBoundingClientRect(),
+    snapshot,
+    targetIndex: state.pantheonOrder.indexOf(id)
+  };
+  rowEl.classList.add('dragging');
+  ev.target.setPointerCapture(ev.pointerId);
+  document.addEventListener('pointermove', onDragMove);
+  document.addEventListener('pointerup', onDragEnd);
+}
+
+function onDragMove(ev){
+  if (!dragState) return;
+  const dy = ev.clientY - dragState.startY;
+  dragState.rowEl.style.transform = `translateY(${dy}px)`;
+
+  const draggedCenter = dragState.startRect.top + dragState.startRect.height/2 + dy;
+  const others = dragState.snapshot.filter(s => s.id !== dragState.id);
+  let newIndex = 0;
+  for (const s of others){
+    if (draggedCenter > s.centerY) newIndex++;
+  }
+  dragState.targetIndex = newIndex;
+
+  document.querySelectorAll('.clue-row').forEach(el => el.classList.remove('drop-before','drop-after'));
+  if (others.length > 0){
+    const clampedIndex = Math.max(0, Math.min(newIndex, others.length));
+    if (clampedIndex < others.length){
+      const targetEl = document.getElementById(`row-${others[clampedIndex].id}`);
+      if (targetEl) targetEl.classList.add('drop-before');
+    } else {
+      const targetEl = document.getElementById(`row-${others[others.length-1].id}`);
+      if (targetEl) targetEl.classList.add('drop-after');
+    }
   }
 }
 
-function handlePantheonClick(id){
-  const nextIndex = state.pantheonClicks.length;
-  if (id === PANTHEON_ORDER[nextIndex]) {
-    state.pantheonClicks.push(id);
-    if (state.pantheonClicks.length === PANTHEON_ORDER.length) {
-      window.PatAchievements.unlock('sharpeye');
-      state.pantheonClicks = [];
-    }
-  } else {
-    state.pantheonClicks = id === PANTHEON_ORDER[0] ? [id] : [];
+function onDragEnd(){
+  if (!dragState) return;
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+  document.querySelectorAll('.clue-row').forEach(el => el.classList.remove('drop-before','drop-after','dragging'));
+
+  const withoutDragged = state.pantheonOrder.filter(x => x !== dragState.id);
+  const idx = Math.max(0, Math.min(dragState.targetIndex, withoutDragged.length));
+  withoutDragged.splice(idx, 0, dragState.id);
+  state.pantheonOrder = withoutDragged;
+
+  dragState = null;
+
+  if (!state.pantheonWin && arraysEqual(state.pantheonOrder, PANTHEON_ORDER)) {
+    state.pantheonWin = true;
+    window.PatAchievements.unlock('sharpeye');
   }
+
+  render();
 }
 
 function checkAnswer(id){
@@ -309,6 +425,14 @@ function showRevealAnimation(){
 
 function closeReveal(){
   document.getElementById('reveal-overlay').classList.remove('active');
+  if (!state.rearrangeStage) {
+    state.rearrangeStage = true;
+    render();
+    setTimeout(() => {
+      state.fadedOut = true;
+      render();
+    }, 400);
+  }
 }
 
 render();

@@ -25,8 +25,26 @@
     { id: "itsforresearch", title: "It's For Research", sub: "Tag the Whale Shark." },
     { id: "sudokuspeedster", title: "Sudoku Speedster", sub: "Complete the sudoku in under 30 minutes." },
     { id: "handsoffecologist", title: "Hands-Off Ecologist", sub: "Let the whale shark swim freely." },
-    { id: "eureka", title: "Eureka!", sub: "Make the discovery before completing the grid." }
+    { id: "eureka", title: "Eureka!", sub: "Make the discovery before completing the grid." },
+    { id: "tada", title: "Ta-da!", sub: "Play your birthday gift from Gabby." },
+    { id: "legendachiever9", title: "LegendAchiever9", sub: "Obtain all achievements." }
   ];
+
+  const GAME_COMPLETE_KEY = 'puzzlesForPatrick_gameCompleted';
+
+  function isGameCompleted(){
+    try {
+      return localStorage.getItem(GAME_COMPLETE_KEY) === '1';
+    } catch (e){
+      return false;
+    }
+  }
+
+  function markGameCompleted(){
+    try {
+      localStorage.setItem(GAME_COMPLETE_KEY, '1');
+    } catch (e){ /* ignore storage errors */ }
+  }
 
   function loadUnlockedIds(){
     try {
@@ -137,6 +155,10 @@
     toastQueue.push(a);
     processToastQueue();
     renderTrophyIcon();
+    if (id !== 'legendachiever9'){
+      const allOthersUnlocked = ACHIEVEMENTS.every(x => x.id === 'legendachiever9' || x.unlocked);
+      if (allOthersUnlocked) unlockAchievement('legendachiever9');
+    }
   }
 
   function processToastQueue(){
@@ -189,13 +211,17 @@
       panel.remove();
       return;
     }
+    const gameCompleted = isGameCompleted();
+    const visibleAchievements = gameCompleted ? ACHIEVEMENTS : ACHIEVEMENTS.filter(a => a.unlocked);
+    const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
+
     panel = document.createElement('div');
     panel.id = 'achv-panel';
     panel.className = 'achv-panel';
     panel.innerHTML = `
-      <div class="achv-panel-title">Achievements</div>
+      <div class="achv-panel-title">Achievements${gameCompleted ? '' : ` (${unlockedCount} found)`}</div>
       <div class="achv-list">
-        ${ACHIEVEMENTS.map(a => `
+        ${visibleAchievements.map(a => `
           <div class="achv-row ${a.unlocked ? '' : 'locked'}">
             <div class="achv-row-icon">${a.unlocked ? '🏆' : '🔒'}</div>
             <div>
@@ -215,6 +241,7 @@
     unlockedIds = new Set();
     saveUnlockedIds([]);
     ACHIEVEMENTS.forEach(a => { a.unlocked = false; });
+    try { localStorage.removeItem(GAME_COMPLETE_KEY); } catch (e){ /* ignore storage errors */ }
     const panel = document.getElementById('achv-panel');
     if (panel) panel.remove();
     toggleAchievementList();
@@ -245,6 +272,7 @@
     unlock: unlockAchievement,
     reset: resetAchievements,
     unlockAll: unlockAllAchievements,
+    markGameCompleted: markGameCompleted,
     list: ACHIEVEMENTS
   };
 })();

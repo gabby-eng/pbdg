@@ -140,6 +140,7 @@ let lockedCells = new Set(); // "r,c" keys confirmed correct by Validate — imm
 let extraValidateClicks = 0;
 let validateLocked = false;
 let easterEggMessage = null;
+let spellCompleted = false;
 
 function devFillSolution(){
   const p = PUZZLES[currentPuzzleIndex];
@@ -177,6 +178,7 @@ function devReset(){
   extraValidateClicks = 0;
   easterEggMessage = null;
   validateLocked = false;
+  spellCompleted = false;
   render();
 }
 
@@ -495,9 +497,26 @@ function render(){
 
   const allDone = currentPuzzleIndex === PUZZLES.length - 1 && isPuzzleFull(currentPuzzleIndex) && isPuzzleCorrect(currentPuzzleIndex);
 
+  if (allDone && !spellCompleted){
+    spellCompleted = true;
+    window.PatAchievements.unlock('tada');
+    window.PatAchievements.markGameCompleted();
+  }
+
+  const totalAchievements = window.PatAchievements.list.length;
+  const unlockedAchievements = window.PatAchievements.list.filter(a => a.unlocked).length;
+
   const winHtml = allDone ? `
     <div class="win-banner">
       <h2>❤</h2>
+      <div style="margin-top:16px;">
+        <a href="index.html" style="display:inline-block;font-family:'Space Mono',monospace;font-size:0.78rem;background:var(--panel-alt);border:1px solid var(--gold);color:var(--gold-bright);padding:10px 20px;border-radius:999px;text-decoration:none;">Back to the beginning</a>
+      </div>
+      ${unlockedAchievements < totalAchievements ? `
+        <div style="margin-top:14px;font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--muted);">
+          ${unlockedAchievements}/${totalAchievements} achievements unlocked... you're not just going to leave it at that, are you?
+        </div>
+      ` : ''}
     </div>
   ` : '';
 

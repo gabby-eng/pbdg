@@ -138,39 +138,11 @@
   <div class="reveal-title">OF COURSE THERE WOULD BE HOLLOW KNIGHT</div>
   <div class="reveal-sub">And no, I still haven't completed the Pantheon of the Sage LOL</div>
   <button class="replay-btn" onclick="closeReveal()">Hmm?</button>
-  <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;opacity:0;animation:titleIn 0.6s ease 1.2s forwards;text-decoration:underline;">Next puzzle set →</a>
+  <a href="numbers.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;opacity:0;animation:titleIn 0.6s ease 1.2s forwards;text-decoration:underline;">Next puzzle set →</a>
 </div>
 
 <script>
 const CLUES = [
-  {
-    id: "artist",
-    word: "ARTIST",
-    clue: "Tristana sidesteps the last duo then jumps - a pro at drawing enemies (6)",
-    hint: "TRISTANA minus its last two letters (NA) = TRISTA; anagram of TRISTA",
-    hintHtml: "<span class=\"hint-yellow\">Tristana</span> <span class=\"hint-pink\">sidesteps the last duo then jumps</span> - <span class=\"hint-blue\">a pro at drawing enemies</span> (6)"
-  },
-  {
-    id: "shade",
-    word: "SHADE",
-    clue: "Shelter from swelter means you can cross out deaths carelessly (5)",
-    hint: "Anagram of DEATHS (carelessly), then remove T (cross)",
-    hintHtml: "<span class=\"hint-blue\">Shelter from swelter</span> means you can <span class=\"hint-pink\">cross out</span> <span class=\"hint-yellow\">deaths</span> <span class=\"hint-pink\">carelessly</span> (5)"
-  },
-  {
-    id: "sage",
-    word: "SAGE",
-    clue: "A churrascaria sausage hides a fragrant herb (4)",
-    hint: "Hidden word: sauSAGE",
-    hintHtml: "A churrascaria <span class=\"hint-yellow\">sausage</span> <span class=\"hint-pink\">hides</span> <span class=\"hint-blue\">a fragrant herb</span> (4)"
-  },
-  {
-    id: "knight",
-    word: "KNIGHT",
-    clue: "A solemn warrior bears the cost as battles of tooth and nail echo the evening (6)",
-    hint: "Homophone: 'the evening' = NIGHT, which sounds like KNIGHT (silent K)",
-    hintHtml: "A <span class=\"hint-blue\">solemn warrior</span> bears the cost as battles of tooth and nail <span class=\"hint-pink\">echo</span> <span class=\"hint-yellow\">the evening</span> (6)"
-  },
   {
     id: "master",
     word: "MASTER",
@@ -184,6 +156,34 @@ const CLUES = [
     clue: "A sorry, jumbled plea... how weak (4)",
     hint: "Anagram of PLEA",
     hintHtml: "A sorry, <span class=\"hint-pink\">jumbled</span> <span class=\"hint-yellow\">plea</span>... how <span class=\"hint-blue\">weak</span> (4)"
+  },
+  {
+    id: "knight",
+    word: "KNIGHT",
+    clue: "A solemn warrior bears the cost as battles of tooth and nail echo the evening (6)",
+    hint: "Homophone: 'the evening' = NIGHT, which sounds like KNIGHT (silent K)",
+    hintHtml: "A <span class=\"hint-blue\">solemn warrior</span> bears the cost as battles of tooth and nail <span class=\"hint-pink\">echo</span> <span class=\"hint-yellow\">the evening</span> (6)"
+  },
+  {
+    id: "sage",
+    word: "SAGE",
+    clue: "A churrascaria sausage hides a fragrant herb (4)",
+    hint: "Hidden word: sauSAGE",
+    hintHtml: "A churrascaria <span class=\"hint-yellow\">sausage</span> <span class=\"hint-pink\">hides</span> <span class=\"hint-blue\">a fragrant herb</span> (4)"
+  },
+  {
+    id: "shade",
+    word: "SHADE",
+    clue: "Shelter from swelter means you can cross out deaths carelessly (5)",
+    hint: "Anagram of DEATHS (carelessly), then remove T (cross)",
+    hintHtml: "<span class=\"hint-blue\">Shelter from swelter</span> means you can <span class=\"hint-pink\">cross out</span> <span class=\"hint-yellow\">deaths</span> <span class=\"hint-pink\">carelessly</span> (5)"
+  },
+  {
+    id: "artist",
+    word: "ARTIST",
+    clue: "Tristana sidesteps the last duo then jumps - a pro at drawing enemies (6)",
+    hint: "TRISTANA minus its last two letters (NA) = TRISTA; anagram of TRISTA",
+    hintHtml: "<span class=\"hint-yellow\">Tristana</span> <span class=\"hint-pink\">sidesteps the last duo then jumps</span> - <span class=\"hint-blue\">a pro at drawing enemies</span> (6)"
   },
   {
     id: "hallownest",
@@ -278,13 +278,13 @@ function render(){
         <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
           <a href="river.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">1 Suits</a>
           <a href="pit.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">2 Hollow</a>
-          <a href="digit-ladder.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">3 Sudoku</a>
-          <a href="crossword.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">4 X-word</a>
-          <a href="open-water.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">5 Water</a>
-          <a href="a-long-time-ago.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">6 Wars</a>
-          <a href="discovery.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">7 Disc</a>
-          <a href="postscript.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">8 PS</a>
-          <a href="a-note-for-you.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">9 Spell</a>
+          <a href="numbers.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">3 Sudoku</a>
+          <a href="words.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">4 X-word</a>
+          <a href="gentle.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">5 Water</a>
+          <a href="loyal.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">6 Wars</a>
+          <a href="observe.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">7 Disc</a>
+          <a href="postletter.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">8 PS</a>
+          <a href="spell.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">9 Spell</a>
           <a href="index.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">10 Lockbox</a>
           <a href="directive.html" style="font-family:'Space Mono',monospace;font-size:0.66rem;background:var(--panel-alt);border:1px solid var(--line);color:var(--muted);padding:4px 8px;border-radius:6px;text-decoration:none;">11 Prologue</a>
         </div>
@@ -301,7 +301,7 @@ function render(){
     ` : ''}
     ${allSolved ? `
       <div style="text-align:center;margin-top:26px;">
-        <a href="digit-ladder.html" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">Next puzzle set →</a>
+        <a href="numbers.html" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">Next puzzle set →</a>
       </div>
     ` : ''}
   `;

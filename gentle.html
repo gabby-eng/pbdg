@@ -300,7 +300,10 @@ function fullChainValid(ids, order){
   return true;
 }
 
+let sharkTaggedThisCycle = false;
+
 function swimWhaleShark(){
+  sharkTaggedThisCycle = false;
   const layer = document.createElement('div');
   layer.className = 'shark-swim-layer';
   layer.innerHTML = `
@@ -320,10 +323,16 @@ function swimWhaleSharkReverse(){
     <img class="shark-swim flip" src="WhaleShark.png" alt="whale shark" onclick="tagWhaleShark()">
   `;
   document.body.appendChild(layer);
-  setTimeout(() => layer.remove(), 6200);
+  setTimeout(() => {
+    layer.remove();
+    if (!sharkTaggedThisCycle){
+      window.PatAchievements.unlock('handsoffecologist');
+    }
+  }, 6200);
 }
 
 function tagWhaleShark(){
+  sharkTaggedThisCycle = true;
   window.PatAchievements.unlock('itsforresearch');
 }
 

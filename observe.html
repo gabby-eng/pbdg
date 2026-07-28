@@ -78,6 +78,8 @@
   .cell.highlight{background:rgba(126,200,227,0.12);}
   .cell.selected{background:rgba(255,216,115,0.22);}
   .cell.conflict.highlight{background:rgba(227,123,107,0.35);}
+  .cell.same-number{background:rgba(255,127,180,0.2);}
+  .cell.same-number.conflict{background:rgba(227,123,107,0.35);}
   .cell.border-right{border-right:2px solid var(--gold);}
   .cell.border-bottom{border-bottom:2px solid var(--gold);}
 
@@ -148,6 +150,19 @@
     .header h1{font-size:1.6rem;}
     .cell input{font-size:0.95rem;}
   }
+
+  .timer-bar{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    margin-top:14px;font-family:'Space Mono',monospace;
+  }
+  .timer-display{font-size:1rem;color:var(--gold-bright);letter-spacing:0.06em;min-width:3.2em;text-align:right;}
+  .timer-display.paused{color:var(--muted);}
+  .timer-pause-btn{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    font-family:'Space Mono',monospace;font-size:0.8rem;
+    padding:4px 12px;border-radius:999px;cursor:pointer;
+  }
+  .timer-pause-btn:hover{border-color:var(--gold);color:var(--gold-bright);}
 </style>
 </head>
 <body>
@@ -209,7 +224,12 @@ function devUnsolve(){
   wordConfirmed = false;
   wordConfirmedAfterFullReveal = false;
   wordGuess = Array(ANSWER_WORD.length).fill('');
+  puzzleSolved = false;
+  timerSeconds = 0;
+  timerManuallyPaused = false;
+  pauseTimer();
   render();
+  startTimer();
 }
 
 const REVEAL_ROW = 4;
@@ -275,6 +295,70 @@ let candidates = {}; // "r,c" -> Set of digits 1-9
 let selectedCell = null; // {r, c} or null
 let everUsedCandidates = false;
 
+let timerSeconds = 0;
+let timerIntervalId = null;
+let timerRunning = false;
+let timerManuallyPaused = false;
+let puzzleSolved = false;
+
+function formatTime(totalSeconds){
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function updateTimerDisplay(){
+  const el = document.getElementById('timer-display');
+  if (el) el.textContent = formatTime(timerSeconds);
+}
+
+function updateTimerButton(){
+  const btn = document.getElementById('timer-pause-btn');
+  if (btn) btn.textContent = timerRunning ? '⏸' : '▶';
+  const display = document.getElementById('timer-display');
+  if (display) display.classList.toggle('paused', !timerRunning);
+}
+
+function startTimer(){
+  if (puzzleSolved || timerIntervalId) return;
+  timerRunning = true;
+  timerIntervalId = setInterval(() => {
+    timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+  updateTimerButton();
+}
+
+function pauseTimer(){
+  if (timerIntervalId){
+    clearInterval(timerIntervalId);
+    timerIntervalId = null;
+  }
+  timerRunning = false;
+  updateTimerButton();
+}
+
+function togglePauseTimer(){
+  if (puzzleSolved) return;
+  if (timerRunning){
+    timerManuallyPaused = true;
+    pauseTimer();
+  } else {
+    timerManuallyPaused = false;
+    startTimer();
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden){
+    if (timerRunning) pauseTimer();
+  } else if (!timerManuallyPaused && !puzzleSolved){
+    startTimer();
+  }
+});
+window.addEventListener('blur', () => { if (timerRunning) pauseTimer(); });
+window.addEventListener('focus', () => { if (!timerManuallyPaused && !puzzleSolved) startTimer(); });
+
 function focusCell(r, c){
   const input = document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
   if (input && !input.disabled){ input.focus(); input.select(); return; }
@@ -284,6 +368,10 @@ function focusCell(r, c){
 
 function selectCell(r, c){
   selectedCell = { r, c };
+  if (!timerRunning && !puzzleSolved){
+    timerManuallyPaused = false;
+    startTimer();
+  }
   render();
   focusCell(r, c);
 }
@@ -295,6 +383,10 @@ function render(){
   const solved = complete && conflicts.size === 0;
   if (solved && !everUsedCandidates){
     window.PatAchievements.unlock('lockedin');
+  }
+  if (solved && !puzzleSolved){
+    puzzleSolved = true;
+    pauseTimer();
   }
 
   let boardHtml = '';
@@ -309,10 +401,16 @@ function render(){
       if (solved && r === REVEAL_ROW) classes.push('reveal');
       if (selectedCell){
         const sameBox = Math.floor(r/3)===Math.floor(selectedCell.r/3) && Math.floor(c/3)===Math.floor(selectedCell.c/3);
+        const selectedVal = grid[selectedCell.r][selectedCell.c];
         if (r === selectedCell.r && c === selectedCell.c){
           classes.push('selected');
-        } else if (r === selectedCell.r || c === selectedCell.c || sameBox){
-          classes.push('highlight');
+        } else {
+          if (r === selectedCell.r || c === selectedCell.c || sameBox){
+            classes.push('highlight');
+          }
+          if (selectedVal && val === selectedVal){
+            classes.push('same-number');
+          }
         }
       }
       if (c===2 || c===5) classes.push('border-right');
@@ -382,6 +480,10 @@ function render(){
       <div class="eyebrow">Puzzles for Patrick</div>
       <h1>!!</h1>
       <div class="sub">Can you figure out the word before completing the grid?</div>
+      <div class="timer-bar">
+        <span class="timer-display ${timerRunning ? '' : 'paused'}" id="timer-display">${formatTime(timerSeconds)}</span>
+        <button class="timer-pause-btn" id="timer-pause-btn" onclick="togglePauseTimer()" ${puzzleSolved ? 'disabled' : ''}>${timerRunning ? '⏸' : '▶'}</button>
+      </div>
       <a href="loyal.html" style="display:inline-block;margin-top:10px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-decoration:underline;">← Previous puzzle set</a>
       <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
         <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
@@ -501,6 +603,9 @@ function checkWordGuess(){
   const val = wordGuess.join('');
   if (val === ANSWER_WORD){
     wordConfirmedAfterFullReveal = legendRevealProgress() >= 1;
+    if (!wordConfirmedAfterFullReveal){
+      window.PatAchievements.unlock('eureka');
+    }
     wordConfirmed = true;
     render();
   } else if (val.length === ANSWER_WORD.length){
@@ -534,6 +639,7 @@ function sparkleHtml(){
 }
 
 render();
+startTimer();
 </script>
 </body>
 </html>

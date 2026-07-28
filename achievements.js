@@ -23,7 +23,9 @@
     { id: "crosswordconqueror", title: "Crossword Conqueror", sub: "Complete the crossword." },
     { id: "marinebiologist", title: "Marine Biologist", sub: "Find the Whale Shark." },
     { id: "itsforresearch", title: "It's For Research", sub: "Tag the Whale Shark." },
-    { id: "sudokuspeedster", title: "Sudoku Speedster", sub: "Complete the sudoku in under 30 minutes." }
+    { id: "sudokuspeedster", title: "Sudoku Speedster", sub: "Complete the sudoku in under 30 minutes." },
+    { id: "handsoffecologist", title: "Hands-Off Ecologist", sub: "Let the whale shark swim freely." },
+    { id: "eureka", title: "Eureka!", sub: "Make the discovery before completing the grid." }
   ];
 
   function loadUnlockedIds(){

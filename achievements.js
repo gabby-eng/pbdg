@@ -22,7 +22,8 @@
     { id: "didyounotice", title: "Did You Like The Gimmick?", sub: "Complete the Postletter crossword." },
     { id: "crosswordconqueror", title: "Crossword Conqueror", sub: "Complete the crossword." },
     { id: "marinebiologist", title: "Marine Biologist", sub: "Find the Whale Shark." },
-    { id: "itsforresearch", title: "It's For Research", sub: "Tag the Whale Shark." }
+    { id: "itsforresearch", title: "It's For Research", sub: "Tag the Whale Shark." },
+    { id: "sudokuspeedster", title: "Sudoku Speedster", sub: "Complete the sudoku in under 30 minutes." }
   ];
 
   function loadUnlockedIds(){

@@ -20,7 +20,9 @@
     { id: "noneed", title: "No Need", sub: "Complete a page without using any hints." },
     { id: "lavieenrose", title: "La Vie En Rose", sub: "Say hello to WALL-E and EVE. Also yes, I drew them myself!" },
     { id: "didyounotice", title: "Did You Like The Gimmick?", sub: "Complete the Postletter crossword." },
-    { id: "crosswordconqueror", title: "Crossword Conqueror", sub: "Complete the crossword." }
+    { id: "crosswordconqueror", title: "Crossword Conqueror", sub: "Complete the crossword." },
+    { id: "marinebiologist", title: "Marine Biologist", sub: "Find the Whale Shark." },
+    { id: "itsforresearch", title: "It's For Research", sub: "Tag the Whale Shark." }
   ];
 
   function loadUnlockedIds(){

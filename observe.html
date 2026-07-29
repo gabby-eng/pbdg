@@ -549,6 +549,7 @@ function toggleCandidate(r, c, digit){
   } else {
     candidates[key].add(digit);
   }
+  window.PatAchievements.unlock('candidatenotation');
   render();
   focusCell(r, c);
 }

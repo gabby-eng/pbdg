@@ -142,6 +142,12 @@
     75%{transform:translateY(2px);}
     100%{transform:translateY(0);}
   }
+  .grub-spawned{
+    position:fixed;z-index:1001;
+    opacity:0;animation:grubSpawnIn 0.3s ease forwards;
+  }
+  @keyframes grubSpawnIn{from{opacity:0;transform:scale(0.5);}to{opacity:1;transform:scale(1);}}
+  .grub-flip img{transform:scaleX(-1);}
 
   @media (prefers-reduced-motion: reduce){ *{animation:none !important;transition:none !important;} }
 </style>
@@ -159,7 +165,6 @@
     <div class="grub-sprite" onclick="hopGrub(this)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
   </div>
   <button class="replay-btn" onclick="closeReveal()">Hmm?</button>
-  <a href="numbers.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;opacity:0;animation:titleIn 0.6s ease 1.2s forwards;text-decoration:underline;">Next puzzle set →</a>
 </div>
 
 <script>
@@ -322,7 +327,7 @@ function render(){
     ` : ''}
     ${allSolved ? `
       <div style="text-align:center;margin-top:26px;">
-        <a href="numbers.html" onclick="handleNextPuzzleClick()" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">${state.pantheonWin ? 'Next →' : 'Oh well. Moving on →'}</a>
+        <a href="numbers.html" onclick="return handleNextPuzzleClick(event)" class="replay-btn" style="display:inline-block;text-decoration:none;opacity:1;animation:none;">${state.pantheonWin ? 'Next →' : 'Oh well. Moving on →'}</a>
       </div>
     ` : ''}
   `;
@@ -447,10 +452,52 @@ function showRevealAnimation(){
   overlay.classList.add('active');
 }
 
+let grubCount = 4;
+let grubsCelebrated = false;
+
 function hopGrub(el){
   el.classList.remove('hopping');
   void el.offsetWidth; // force reflow so the animation can retrigger
   el.classList.add('hopping');
+  spawnRandomGrub();
+}
+
+function spawnRandomGrub(){
+  grubCount++;
+
+  const w = 50, h = 55;
+  const maxLeft = Math.max(0, window.innerWidth - w - 20);
+  const maxTop = Math.max(0, window.innerHeight - h - 20);
+  const left = 10 + Math.random() * maxLeft;
+  const top = 10 + Math.random() * maxTop;
+  const flip = Math.random() < 0.5;
+
+  const grub = document.createElement('div');
+  grub.className = `grub-sprite grub-spawned${flip ? ' grub-flip' : ''}`;
+  grub.style.left = left + 'px';
+  grub.style.top = top + 'px';
+  grub.onclick = () => hopGrub(grub);
+  grub.innerHTML = `<img src="Grub.png" alt="Grub" width="${w}" height="${h}">`;
+  document.body.appendChild(grub);
+
+  if (grubCount >= 46){
+    window.PatAchievements.unlock('grubfather');
+    if (!grubsCelebrated){
+      grubsCelebrated = true;
+      celebrateGrubs();
+    }
+  }
+}
+
+function celebrateGrubs(){
+  document.querySelectorAll('.grub-sprite').forEach(el => {
+    const delay = Math.random() * 1400;
+    setTimeout(() => {
+      el.classList.remove('hopping');
+      void el.offsetWidth;
+      el.classList.add('hopping');
+    }, delay);
+  });
 }
 
 function closeReveal(){
@@ -465,10 +512,14 @@ function closeReveal(){
   }
 }
 
-function handleNextPuzzleClick(){
+function handleNextPuzzleClick(event){
   if (!state.pantheonWin){
+    event.preventDefault();
     window.PatAchievements.unlock('dontcare');
+    setTimeout(() => { window.location.href = 'numbers.html'; }, 600);
+    return false;
   }
+  return true;
 }
 
 render();

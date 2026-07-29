@@ -9,7 +9,7 @@
   const ACHIEVEMENT_DEFS = [
     { id: "metadiscovery", title: "Oh what?", sub: "Discover achievements." },
     { id: "firsttry", title: "First Try", sub: "Enter the correct code on the first attempt." },
-    { id: "curious", title: "Curious!", sub: "Enter an incorrect code 5 times." },
+    { id: "curious", title: "Achievement Hunting, Are We?", sub: "Enter an incorrect code 5 times." },
     { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." },
     { id: "grubnoises", title: "*Grub Noises*", sub: "<em>...Home...</em>" },
     { id: "sharpeye", title: "Godhome Regular", sub: "Arrange the Pantheons in order. As God intended." },
@@ -20,14 +20,15 @@
     { id: "lavieenrose", title: "La Vie En Rose", sub: "Say hello to WALL-E and EVE. Also yes, I drew them myself!" },
     { id: "didyounotice", title: "Did You Like The Gimmick?", sub: "Complete the Postletter crossword." },
     { id: "crosswordconqueror", title: "Crossword Conqueror", sub: "Complete the crossword." },
-    { id: "marinebiologist", title: "Marine Biologist", sub: "Find the Whale Shark." },
-    { id: "itsforresearch", title: "It's For Research", sub: "Tag the Whale Shark." },
+    { id: "marinebiologist", title: "Marine Biologist", sub: "Find the whale shark." },
+    { id: "itsforresearch", title: "It's For Research", sub: "Tag the whale shark." },
     { id: "sudokuspeedster", title: "Sudoku Speedster", sub: "Complete the sudoku in under 30 minutes." },
     { id: "handsoffecologist", title: "Hands-Off Ecologist", sub: "Let the whale shark swim freely." },
     { id: "eureka", title: "Eureka!", sub: "Make the discovery before completing the grid." },
     { id: "tada", title: "Ta-da!", sub: "Play your birthday gift from Gabby." },
     { id: "dontcare", title: "Don't Care. Didn't Ask.", sub: "Leave things as you find them. I guess." },
     { id: "achievementhunter", title: "Achievement Hunter", sub: "Hunt for missing achievements." },
+    { id: "grubfather", title: "Grubfather", sub: "<em>Happy...happy...happy!!!</em>" },
     { id: "legendachiever9", title: "LegendAchiever9", sub: "Obtain all achievements." }
   ];
 
@@ -44,6 +45,22 @@
   function markGameCompleted(){
     try {
       localStorage.setItem(GAME_COMPLETE_KEY, '1');
+    } catch (e){ /* ignore storage errors */ }
+  }
+
+  const NEW_GAME_PLUS_KEY = 'puzzlesForPatrick_newGamePlus';
+
+  function isNewGamePlus(){
+    try {
+      return localStorage.getItem(NEW_GAME_PLUS_KEY) === '1';
+    } catch (e){
+      return false;
+    }
+  }
+
+  function markNewGamePlus(){
+    try {
+      localStorage.setItem(NEW_GAME_PLUS_KEY, '1');
     } catch (e){ /* ignore storage errors */ }
   }
 
@@ -271,6 +288,7 @@
     saveUnlockedIds([]);
     ACHIEVEMENTS.forEach(a => { a.unlocked = false; });
     try { localStorage.removeItem(GAME_COMPLETE_KEY); } catch (e){ /* ignore storage errors */ }
+    try { localStorage.removeItem(NEW_GAME_PLUS_KEY); } catch (e){ /* ignore storage errors */ }
     const panel = document.getElementById('achv-panel');
     if (panel) panel.remove();
     toggleAchievementList();
@@ -302,6 +320,8 @@
     reset: resetAchievements,
     unlockAll: unlockAllAchievements,
     markGameCompleted: markGameCompleted,
+    isNewGamePlus: isNewGamePlus,
+    markNewGamePlus: markNewGamePlus,
     list: ACHIEVEMENTS
   };
 })();

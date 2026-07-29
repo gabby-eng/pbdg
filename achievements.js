@@ -11,10 +11,9 @@
     { id: "firsttry", title: "First Try", sub: "Enter the correct code on the first attempt." },
     { id: "curious", title: "Curious!", sub: "Enter an incorrect code 5 times." },
     { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." },
-    { id: "grubnoises", title: "*Grub Noises*", sub: "Hollow Knight mentioned." },
+    { id: "grubnoises", title: "*Grub Noises*", sub: "<em>...Home...</em>" },
     { id: "sharpeye", title: "Godhome Regular", sub: "Arrange the Pantheons in order. As God intended." },
-    { id: "candidatenotation", title: "I Hope You Appreciated That", sub: "Candidate notation utilized." },
-    { id: "lockedin", title: "Locked In", sub: "Complete the sudoku without placing a single pencil-mark candidate." },
+    { id: "candidatenotation", title: "I Hope You Appreciated That", sub: "Utilize candidate notation." },
     { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." },
     { id: "noshame", title: "No Shame", sub: "Use a hint for the first time." },
     { id: "noneed", title: "No Need", sub: "Complete a page without using any hints." },
@@ -27,6 +26,8 @@
     { id: "handsoffecologist", title: "Hands-Off Ecologist", sub: "Let the whale shark swim freely." },
     { id: "eureka", title: "Eureka!", sub: "Make the discovery before completing the grid." },
     { id: "tada", title: "Ta-da!", sub: "Play your birthday gift from Gabby." },
+    { id: "dontcare", title: "Don't Care. Didn't Ask.", sub: "Leave things as you find them. I guess." },
+    { id: "achievementhunter", title: "Achievement Hunter", sub: "Hunt for missing achievements." },
     { id: "legendachiever9", title: "LegendAchiever9", sub: "Obtain all achievements." }
   ];
 

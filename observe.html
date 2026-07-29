@@ -298,7 +298,6 @@ function legendRevealProgress(){
 
 let candidates = {}; // "r,c" -> Set of digits 1-9
 let selectedCell = null; // {r, c} or null
-let everUsedCandidates = false;
 
 let timerSeconds = 0;
 let timerIntervalId = null;
@@ -386,9 +385,6 @@ function render(){
   const conflicts = checkConflicts();
   const complete = isComplete();
   const solved = complete && conflicts.size === 0;
-  if (solved && !everUsedCandidates){
-    window.PatAchievements.unlock('lockedin');
-  }
   if (solved && !puzzleSolved){
     puzzleSolved = true;
     pauseTimer();
@@ -553,7 +549,6 @@ function toggleCandidate(r, c, digit){
   } else {
     candidates[key].add(digit);
   }
-  everUsedCandidates = true;
   render();
   focusCell(r, c);
 }

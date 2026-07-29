@@ -464,6 +464,10 @@ function hopGrub(el, event){
     event.preventDefault();
     event.stopPropagation();
   }
+  if (grubCount >= 46){
+    celebrateGrubs();
+    return;
+  }
   el.classList.remove('hopping');
   void el.offsetWidth; // force reflow so the animation can retrigger
   el.classList.add('hopping');

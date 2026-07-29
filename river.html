@@ -110,11 +110,20 @@
     width:100%;height:100%;display:block;
     image-rendering:pixelated;image-rendering:crisp-edges;
   }
-  .card.gold-card{box-shadow:0 10px 30px rgba(232,184,75,0.45), 0 10px 26px rgba(0,0,0,0.45);}
+  .card.gold-card{box-shadow:0 10px 30px rgba(232,184,75,0.45), 0 10px 26px rgba(0,0,0,0.45);cursor:pointer;}
 
   @keyframes dealIn{
     to{opacity:1;}
   }
+
+  @keyframes cardWiggle{
+    0%,100%{transform:rotate(0deg);}
+    20%{transform:rotate(-8deg);}
+    40%{transform:rotate(6deg);}
+    60%{transform:rotate(-4deg);}
+    80%{transform:rotate(3deg);}
+  }
+  .card img.wiggling{animation:cardWiggle 0.5s ease-in-out;}
 
   .replay-btn{
     font-family:'Space Mono',monospace;font-size:0.85rem;background:var(--panel-alt);
@@ -386,6 +395,7 @@ function showFlushAnimation(){
     card.style.animationDelay = (i * 0.12) + 's';
     card.style.transform = `translate(calc(-50% + ${xOffset}px), -50%) translateY(80px) scale(0.4) rotate(0deg)`;
     card.innerHTML = `<img src="${img}" alt="${label}">`;
+    if (special) card.onclick = () => wiggleJoker(card.querySelector('img'));
     fan.appendChild(card);
     requestAnimationFrame(() => {
       setTimeout(() => {
@@ -395,6 +405,17 @@ function showFlushAnimation(){
     });
   }
   overlay.classList.add('active');
+}
+
+let jokerClickCount = 0;
+function wiggleJoker(img){
+  img.classList.remove('wiggling');
+  void img.offsetWidth; // force reflow so the animation can retrigger
+  img.classList.add('wiggling');
+  jokerClickCount++;
+  if (jokerClickCount === 4){
+    window.PatAchievements.unlock('boo');
+  }
 }
 
 render();

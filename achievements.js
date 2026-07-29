@@ -29,6 +29,7 @@
     { id: "dontcare", title: "Don't Care. Didn't Ask.", sub: "Leave things as you find them. I guess." },
     { id: "achievementhunter", title: "Achievement Hunter", sub: "Hunt for missing achievements." },
     { id: "grubfather", title: "Grubfather", sub: "<em>Happy...happy...happy!!!</em>" },
+    { id: "boo", title: "Boo!", sub: "<em>Eee hee hee hee...</em>" },
     { id: "legendachiever9", title: "LegendAchiever9", sub: "Obtain all achievements." }
   ];
 

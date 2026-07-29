@@ -133,7 +133,11 @@
     opacity:0;animation:titleIn 0.6s ease 0.75s forwards;
   }
   .grub-row img{display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
-  .grub-sprite{cursor:pointer;}
+  .grub-sprite{
+    cursor:pointer;touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;
+    -webkit-user-select:none;user-select:none;
+  }
   .grub-sprite.hopping{animation:grubHop 0.5s ease-out;}
   @keyframes grubHop{
     0%{transform:translateY(0);}
@@ -159,10 +163,10 @@
   <div class="reveal-title">OF COURSE THERE WOULD BE HOLLOW KNIGHT</div>
   <div class="reveal-sub">And no, I still haven't completed the Pantheon of the Sage LOL</div>
   <div class="grub-row">
-    <div class="grub-sprite" onclick="hopGrub(this)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
-    <div class="grub-sprite" onclick="hopGrub(this)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
-    <div class="grub-sprite" onclick="hopGrub(this)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
-    <div class="grub-sprite" onclick="hopGrub(this)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
+    <div class="grub-sprite" onclick="hopGrub(this, event)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
+    <div class="grub-sprite" onclick="hopGrub(this, event)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
+    <div class="grub-sprite" onclick="hopGrub(this, event)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
+    <div class="grub-sprite" onclick="hopGrub(this, event)"><img src="Grub.png" alt="Grub" width="50" height="55"></div>
   </div>
   <button class="replay-btn" onclick="closeReveal()">Hmm?</button>
 </div>
@@ -455,7 +459,11 @@ function showRevealAnimation(){
 let grubCount = 4;
 let grubsCelebrated = false;
 
-function hopGrub(el){
+function hopGrub(el, event){
+  if (event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
   el.classList.remove('hopping');
   void el.offsetWidth; // force reflow so the animation can retrigger
   el.classList.add('hopping');
@@ -465,18 +473,23 @@ function hopGrub(el){
 function spawnRandomGrub(){
   grubCount++;
 
+  const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const vLeft = window.visualViewport ? window.visualViewport.offsetLeft : 0;
+  const vTop = window.visualViewport ? window.visualViewport.offsetTop : 0;
+
   const w = 50, h = 55;
-  const maxLeft = Math.max(0, window.innerWidth - w - 20);
-  const maxTop = Math.max(0, window.innerHeight - h - 20);
-  const left = 10 + Math.random() * maxLeft;
-  const top = 10 + Math.random() * maxTop;
+  const maxLeft = Math.max(0, vw - w - 20);
+  const maxTop = Math.max(0, vh - h - 20);
+  const left = vLeft + 10 + Math.random() * maxLeft;
+  const top = vTop + 10 + Math.random() * maxTop;
   const flip = Math.random() < 0.5;
 
   const grub = document.createElement('div');
   grub.className = `grub-sprite grub-spawned${flip ? ' grub-flip' : ''}`;
   grub.style.left = left + 'px';
   grub.style.top = top + 'px';
-  grub.onclick = () => hopGrub(grub);
+  grub.onclick = (e) => hopGrub(grub, e);
   grub.innerHTML = `<img src="Grub.png" alt="Grub" width="${w}" height="${h}">`;
   document.body.appendChild(grub);
 

@@ -481,8 +481,23 @@ function spawnRandomGrub(){
   const w = 50, h = 55;
   const maxLeft = Math.max(0, vw - w - 20);
   const maxTop = Math.max(0, vh - h - 20);
-  const left = vLeft + 10 + Math.random() * maxLeft;
-  const top = vTop + 10 + Math.random() * maxTop;
+
+  const avoidBtn = document.querySelector('#reveal-overlay .replay-btn');
+  const avoidRect = avoidBtn ? avoidBtn.getBoundingClientRect() : null;
+  const padding = 16;
+
+  let left, top, attempts = 0;
+  do {
+    left = vLeft + 10 + Math.random() * maxLeft;
+    top = vTop + 10 + Math.random() * maxTop;
+    attempts++;
+  } while (
+    avoidRect && avoidRect.width > 0 &&
+    left < avoidRect.right + padding && left + w > avoidRect.left - padding &&
+    top < avoidRect.bottom + padding && top + h > avoidRect.top - padding &&
+    attempts < 20
+  );
+
   const flip = Math.random() < 0.5;
 
   const grub = document.createElement('div');

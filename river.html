@@ -100,21 +100,17 @@
   .card-fan{position:relative;width:340px;height:220px;margin-bottom:20px;}
   .card{
     position:absolute;left:50%;top:50%;width:100px;height:150px;
-    background:var(--cream);border-radius:10px;border:1px solid #d9cfb6;
+    border-radius:10px;overflow:hidden;
     box-shadow:0 10px 26px rgba(0,0,0,0.45);
     transform:translate(-50%,-50%) translateY(80px) scale(0.4) rotate(0deg);
     opacity:0;
     animation:dealIn 0.55s cubic-bezier(.2,.9,.3,1.3) forwards;
-    display:flex;flex-direction:column;justify-content:space-between;padding:8px;
-    font-family:'Fraunces',serif;
   }
-  .card .rank-top{font-size:1.1rem;font-weight:700;line-height:1;}
-  .card .suit-mid{font-size:2.2rem;text-align:center;line-height:1;}
-  .card .rank-bottom{font-size:1.1rem;font-weight:700;align-self:flex-end;transform:rotate(180deg);line-height:1;}
-  .card.red{color:var(--red-suit);}
-  .card.black{color:var(--black-suit);}
-  .card.gold-card{color:var(--gold);border-color:var(--gold);box-shadow:0 10px 30px rgba(232,184,75,0.45), 0 10px 26px rgba(0,0,0,0.45);}
-  .card.gold-card .suit-mid{font-size:1.9rem;}
+  .card img{
+    width:100%;height:100%;display:block;
+    image-rendering:pixelated;image-rendering:crisp-edges;
+  }
+  .card.gold-card{box-shadow:0 10px 30px rgba(232,184,75,0.45), 0 10px 26px rgba(0,0,0,0.45);}
 
   @keyframes dealIn{
     to{opacity:1;}
@@ -369,11 +365,11 @@ function animateFlushReveal(input){
 }
 
 const HAND = [
-  { rank: "9", suit: "♠", cls: "black" },
-  { rank: "9", suit: "♦", cls: "red" },
-  { rank: "9", suit: "♥", cls: "red" },
-  { rank: "9", suit: "♣", cls: "black" },
-  { rank: "JKR", suit: "🃏", cls: "gold-card" }
+  { img: "Spade.png", label: "9 of Spades" },
+  { img: "Diamond.png", label: "9 of Diamonds" },
+  { img: "Heart.png", label: "9 of Hearts" },
+  { img: "Club.png", label: "9 of Clubs" },
+  { img: "Joker.png", label: "Joker", special: true }
 ];
 function showFlushAnimation(){
   const overlay = document.getElementById('flush-overlay');
@@ -385,16 +381,12 @@ function showFlushAnimation(){
   for (let i = 0; i < n; i++){
     const angle = startAngle + i * spread;
     const xOffset = angle * 2.4;
-    const { rank, suit, cls } = HAND[i];
+    const { img, label, special } = HAND[i];
     const card = document.createElement('div');
-    card.className = `card ${cls}`;
+    card.className = `card${special ? ' gold-card' : ''}`;
     card.style.animationDelay = (i * 0.12) + 's';
     card.style.transform = `translate(calc(-50% + ${xOffset}px), -50%) translateY(80px) scale(0.4) rotate(0deg)`;
-    card.innerHTML = `
-      <div class="rank-top">${rank}<br>${suit}</div>
-      <div class="suit-mid">${suit}</div>
-      <div class="rank-bottom">${rank}<br>${suit}</div>
-    `;
+    card.innerHTML = `<img src="${img}" alt="${label}">`;
     fan.appendChild(card);
     requestAnimationFrame(() => {
       setTimeout(() => {

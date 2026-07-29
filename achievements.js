@@ -161,10 +161,39 @@
     }
   }
 
+  let sharedAudioCtx = null;
+
+  function playAchievementChime(){
+    try {
+      if (!sharedAudioCtx){
+        sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = sharedAudioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const now = ctx.currentTime;
+      const notes = [880, 1318.51]; // A5 -> E6, a bright little "ding-ding"
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const start = now + i * 0.1;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.16, start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.45);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.45);
+      });
+    } catch (e){ /* audio not available, ignore */ }
+  }
+
   function processToastQueue(){
     if (toastShowing || toastQueue.length === 0) return;
     toastShowing = true;
     const a = toastQueue.shift();
+    playAchievementChime();
     showAchievementToast(a.title, a.sub, () => {
       toastShowing = false;
       processToastQueue();
@@ -213,13 +242,12 @@
     }
     const gameCompleted = isGameCompleted();
     const visibleAchievements = gameCompleted ? ACHIEVEMENTS : ACHIEVEMENTS.filter(a => a.unlocked);
-    const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length;
 
     panel = document.createElement('div');
     panel.id = 'achv-panel';
     panel.className = 'achv-panel';
     panel.innerHTML = `
-      <div class="achv-panel-title">Achievements${gameCompleted ? '' : ` (${unlockedCount} found)`}</div>
+      <div class="achv-panel-title">Achievements</div>
       <div class="achv-list">
         ${visibleAchievements.map(a => `
           <div class="achv-row ${a.unlocked ? '' : 'locked'}">

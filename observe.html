@@ -50,6 +50,30 @@
     border-radius:6px;
     overflow:hidden;
   }
+  .board.dance-floor .cell{overflow:hidden;}
+  .board.dance-floor .cell::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    opacity:0.5;mix-blend-mode:screen;
+    background:linear-gradient(135deg,#ff5f7e,#ffd873,#7ee8c7,#7ec8ff,#c48bff,#ff5f7e);
+    background-size:400% 400%;
+    animation:discoFloor 3s ease-in-out infinite;
+  }
+  @keyframes discoFloor{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  .board.dance-floor .cell:nth-child(9n+1)::after,
+  .board.dance-floor .cell:nth-child(9n+4)::after,
+  .board.dance-floor .cell:nth-child(9n+7)::after{animation-delay:-0.5s;}
+  .board.dance-floor .cell:nth-child(9n+2)::after,
+  .board.dance-floor .cell:nth-child(9n+5)::after,
+  .board.dance-floor .cell:nth-child(9n+8)::after{animation-delay:-1.5s;}
+  .board.dance-floor .cell:nth-child(9n+3)::after,
+  .board.dance-floor .cell:nth-child(9n+6)::after,
+  .board.dance-floor .cell:nth-child(9n+9)::after{animation-delay:-2.2s;}
+  .board.dance-floor{animation:discoFloorFade 6s ease-in-out forwards;}
+  @keyframes discoFloorFade{0%,80%{opacity:1;}100%{opacity:0;}}
   .sparkle-overlay{position:absolute;inset:0;pointer-events:none;}
   .sparkle{
     position:absolute;font-size:1.1rem;color:var(--gold-bright);
@@ -622,7 +646,17 @@ function spinDiscoBall(){
   discoSpinCount++;
   if (discoSpinCount === 3){
     window.PatAchievements.unlock('partyanimal');
+    startDanceFloor();
   }
+}
+
+function startDanceFloor(){
+  const board = document.querySelector('.board');
+  if (!board) return;
+  board.classList.remove('dance-floor');
+  void board.offsetWidth;
+  board.classList.add('dance-floor');
+  setTimeout(() => board.classList.remove('dance-floor'), 6000);
 }
 
 function sparkleHtml(){

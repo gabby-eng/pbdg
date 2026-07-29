@@ -148,8 +148,8 @@
   }
   .grub-spawned{
     position:fixed;z-index:1001;
-    opacity:0;animation:grubSpawnIn 0.3s ease forwards;
   }
+  .grub-spawn-in{opacity:0;animation:grubSpawnIn 0.3s ease forwards;}
   @keyframes grubSpawnIn{from{opacity:0;transform:scale(0.5);}to{opacity:1;transform:scale(1);}}
   .grub-flip img{transform:scaleX(-1);}
 
@@ -501,12 +501,13 @@ function spawnRandomGrub(){
   const flip = Math.random() < 0.5;
 
   const grub = document.createElement('div');
-  grub.className = `grub-sprite grub-spawned${flip ? ' grub-flip' : ''}`;
+  grub.className = `grub-sprite grub-spawned grub-spawn-in${flip ? ' grub-flip' : ''}`;
   grub.style.left = left + 'px';
   grub.style.top = top + 'px';
   grub.onclick = (e) => hopGrub(grub, e);
   grub.innerHTML = `<img src="Grub.png" alt="Grub" width="${w}" height="${h}">`;
   document.body.appendChild(grub);
+  setTimeout(() => grub.classList.remove('grub-spawn-in'), 300);
 
   if (grubCount >= 46){
     window.PatAchievements.unlock('grubfather');

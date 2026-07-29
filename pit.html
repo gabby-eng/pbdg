@@ -535,6 +535,9 @@ function celebrateGrubs(){
 
 function closeReveal(){
   document.getElementById('reveal-overlay').classList.remove('active');
+  document.querySelectorAll('.grub-spawned').forEach(el => el.remove());
+  grubCount = 4;
+  grubsCelebrated = false;
   if (!state.rearrangeStage) {
     state.rearrangeStage = true;
     render();

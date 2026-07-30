@@ -10,7 +10,7 @@
     { id: "metadiscovery", title: "Oh what?", sub: "Discover achievements." },
     { id: "firsttry", title: "First Try", sub: "Enter the correct code on the first attempt." },
     { id: "curious", title: "Achievement Hunting, Are We?", sub: "Enter an incorrect code 5 times." },
-    { id: "lavieenrose", title: "La Vie En Rose", sub: "Say hello to WALL-E and EVE. Also yes, I drew them myself!" },
+    { id: "lavieenrose", title: "La Vie En Rose", sub: "Say hello to WALL-E and EVE." },
     { id: "noshame", title: "No Shame", sub: "Use a hint for the first time." },
     { id: "noneed", title: "No Need", sub: "Complete a page without using any hints." },
     { id: "warmedup", title: "Warmed Up", sub: "Achieve five of a kind." },
@@ -30,7 +30,7 @@
     { id: "ohhhisee", title: "Ohhh I see..", sub: "Input the discovery after completing the grid." },
     { id: "partyanimal", title: "Party Animal", sub: "Spin the disco ball 3 times." },
     { id: "didyounotice", title: "Did You Like The Gimmick?", sub: "Complete the Postletter crossword." },
-    { id: "theseareforyou", title: "These Magnolias Are For You", sub: "Complete the annual spell." },
+    { id: "theseareforyou", title: "These Magnolias Are For You", sub: "Complete the Annual Spell." },
     { id: "tada", title: "Ta-da!", sub: "Play your birthday gift from Gabby." },
     { id: "achievementhunter", title: "Achievement Hunter", sub: "Hunt for missing achievements." },
     { id: "legendachiever9", title: "LegendAchiever9", sub: "Obtain all achievements." }
@@ -303,6 +303,7 @@
   }
 
   function renderTrophyIcon(){
+    if (unlockedIds.size === 0) return;
     let icon = document.getElementById('achv-trophy-icon');
     if (!icon){
       icon = document.createElement('div');
@@ -340,8 +341,6 @@
           </div>
         `).join('')}
       </div>
-      <button class="achv-reset-btn" onclick="PatAchievements.unlockAll()">Unlock all (dev)</button>
-      <button class="achv-reset-btn" onclick="PatAchievements.reset()">Reset progress (dev)</button>
     `;
     document.body.appendChild(panel);
   }

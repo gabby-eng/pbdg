@@ -229,7 +229,7 @@
     overlay.innerHTML = `
       <div class="achv-legend-modal">
         <div class="achv-legend-title">Congratulations!</div>
-        <div class="achv-legend-body">You have thoroughly played this gift. You may now flip freely through all the puzzles and reminisce. I hope you had fun!</div>
+        <div class="achv-legend-body">You have now thoroughly played this birthday gift. :^) You may now flip freely through all the puzzles and reminisce. I hope you had fun!</div>
         <div class="achv-legend-stats">Total time played: ${formatPlaytime(getTotalPlaySeconds())}</div>
         <button class="achv-legend-dismiss">Close</button>
       </div>

@@ -24,7 +24,7 @@
     { id: "sudokuenjoyer", title: "Sudoku Enjoyer", sub: "Complete the sudoku." },
     { id: "crosswordconqueror", title: "Crossword Conqueror", sub: "Complete the crossword." },
     { id: "marinebiologist", title: "Marine Biologist", sub: "Find the whale shark." },
-    { id: "itsforresearch", title: "It's For Research", sub: "Tag the whale shark." },
+    { id: "itsforresearch", title: "It's For Research", sub: "Tag the whale shark as it swims by." },
     { id: "handsoffecologist", title: "Hands-Off Ecologist", sub: "Let the whale shark swim freely." },
     { id: "eureka", title: "Eureka!", sub: "Make the discovery before completing the grid." },
     { id: "ohhhisee", title: "Ohhh I see..", sub: "Input the discovery after completing the grid." },

@@ -494,10 +494,7 @@ function render(){
           <button onclick="checkPlacement()" ${validateLocked ? 'disabled' : ''} style="font-family:'Space Mono',monospace;font-size:0.7rem;background:none;border:1px solid var(--line);color:var(--muted);padding:6px 14px;border-radius:999px;cursor:${validateLocked ? 'default' : 'pointer'};${validateLocked ? 'opacity:0.5;' : ''}">${validateLocked ? 'Validated' : 'Validate letters'}</button>
         </div>
         ${easterEggMessage ? `
-          <div style="position:relative;text-align:center;padding-top:14px;overflow:hidden;height:40px;">
-            ${['12%','28%','45%','62%','78%','90%'].map((left,i) =>
-              `<div class="falling-heart" style="left:${left};animation-delay:${(i*0.12).toFixed(2)}s;">❤</div>`
-            ).join('')}
+          <div style="position:relative;text-align:center;padding-top:14px;">
             <div style="font-family:'Space Mono',monospace;font-size:0.8rem;color:var(--gold-bright);position:relative;z-index:2;">${easterEggMessage}</div>
           </div>
         ` : ''}

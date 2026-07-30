@@ -292,6 +292,7 @@ function render(){
   if (solved && !puzzleSolved){
     puzzleSolved = true;
     pauseTimer();
+    window.PatAchievements.unlock('sudokuenjoyer');
     if (timerSeconds < 1800){
       window.PatAchievements.unlock('sudokuspeedster');
     }

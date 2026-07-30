@@ -627,6 +627,8 @@ function checkWordGuess(){
     wordConfirmedAfterFullReveal = legendRevealProgress() >= 1;
     if (!wordConfirmedAfterFullReveal){
       window.PatAchievements.unlock('eureka');
+    } else {
+      window.PatAchievements.unlock('ohhhisee');
     }
     wordConfirmed = true;
     render();

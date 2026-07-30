@@ -160,6 +160,36 @@
         text-transform:uppercase;padding:7px 10px;border-radius:8px;cursor:pointer;
       }
       .achv-reset-btn:hover{border-color:var(--gold, #E8B84B);color:var(--gold-bright, #FFD873);}
+
+      .achv-legend-overlay{
+        position:fixed;inset:0;z-index:2000;
+        background:rgba(6,42,32,0.72);
+        display:flex;align-items:center;justify-content:center;
+        opacity:0;transition:opacity 0.35s ease;
+        padding:20px;
+      }
+      .achv-legend-overlay.show{opacity:1;}
+      .achv-legend-modal{
+        background:linear-gradient(135deg, var(--panel-alt, #145843), var(--panel, #0F4A38));
+        border:1px solid var(--gold, #E8B84B);border-radius:14px;
+        padding:28px 26px;max-width:360px;text-align:center;
+        box-shadow:0 20px 50px rgba(0,0,0,0.5);
+        transform:scale(0.9);transition:transform 0.35s ease;
+        font-family:'Space Mono',monospace;
+      }
+      .achv-legend-overlay.show .achv-legend-modal{transform:scale(1);}
+      .achv-legend-title{
+        font-family:'Fraunces',serif;font-weight:700;font-size:1.3rem;
+        color:var(--gold-bright, #FFD873);margin-bottom:12px;
+        text-shadow:0 0 20px rgba(255,216,115,0.4);
+      }
+      .achv-legend-body{font-size:0.85rem;color:var(--text, #F3EFE3);line-height:1.6;margin-bottom:20px;}
+      .achv-legend-dismiss{
+        font-family:'Space Mono',monospace;font-size:0.78rem;background:none;
+        border:1px solid var(--gold, #E8B84B);color:var(--gold-bright, #FFD873);
+        padding:10px 22px;border-radius:999px;cursor:pointer;
+      }
+      .achv-legend-dismiss:hover{background:var(--gold, #E8B84B);color:var(--felt-deep, #062A20);}
     `;
     document.head.appendChild(style);
   }
@@ -180,7 +210,30 @@
     if (id !== 'legendachiever9'){
       const allOthersUnlocked = ACHIEVEMENTS.every(x => x.id === 'legendachiever9' || x.unlocked);
       if (allOthersUnlocked) unlockAchievement('legendachiever9');
+    } else {
+      setTimeout(showLegendModal, 3200);
     }
+  }
+
+  function showLegendModal(){
+    injectStyles();
+    if (document.getElementById('achv-legend-overlay')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'achv-legend-overlay';
+    overlay.className = 'achv-legend-overlay';
+    overlay.innerHTML = `
+      <div class="achv-legend-modal">
+        <div class="achv-legend-title">Congratulations!</div>
+        <div class="achv-legend-body">You have thoroughly played this gift. You may now flip freely through all the puzzles and reminisce. I hope you had fun!</div>
+        <button class="achv-legend-dismiss">Close</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.querySelector('.achv-legend-dismiss').onclick = () => {
+      overlay.classList.remove('show');
+      setTimeout(() => overlay.remove(), 350);
+    };
+    setTimeout(() => overlay.classList.add('show'), 20);
   }
 
   let sharedAudioCtx = null;

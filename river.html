@@ -377,7 +377,7 @@ const HAND = [
   { img: "Diamond.png", label: "9 of Diamonds" },
   { img: "Heart.png", label: "9 of Hearts" },
   { img: "Club.png", label: "9 of Clubs" },
-  { img: "Joker.png", label: "Joker", special: true }
+  { img: "ShyJoker.png", label: "Joker", special: true }
 ];
 function showFlushAnimation(){
   const overlay = document.getElementById('flush-overlay');
@@ -415,6 +415,7 @@ function wiggleJoker(img){
   jokerClickCount++;
   if (jokerClickCount === 4){
     window.PatAchievements.unlock('boo');
+    img.src = 'Joker.png';
   }
 }
 

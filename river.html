@@ -125,6 +125,23 @@
   }
   .card img.wiggling{animation:cardWiggle 0.5s ease-in-out;}
 
+  .boo-ghost{
+    position:fixed;bottom:-110px;z-index:2000;pointer-events:none;
+    opacity:0;
+    animation:booFly 4s ease-in forwards;
+  }
+  @keyframes booFly{
+    0%{transform:translate(0,0);opacity:0;}
+    8%{opacity:0.95;}
+    20%{transform:translate(-18px,-22vh);}
+    40%{transform:translate(16px,-46vh);}
+    60%{transform:translate(-16px,-70vh);}
+    80%{transform:translate(14px,-96vh);opacity:0.9;}
+    100%{transform:translate(0,-125vh);opacity:0;}
+  }
+  .boo-ghost-img{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;}
+  .boo-ghost-img.boo-flip{transform:scaleX(-1);}
+
   .replay-btn{
     font-family:'Space Mono',monospace;font-size:0.85rem;background:var(--panel-alt);
     color:var(--text);border:1px solid var(--gold);padding:12px 22px;border-radius:999px;
@@ -416,6 +433,25 @@ function wiggleJoker(img){
   if (jokerClickCount === 4){
     window.PatAchievements.unlock('boo');
     img.src = 'Joker.png';
+    spawnBooGhosts();
+  }
+}
+
+function spawnBooGhosts(){
+  const count = 5 + Math.floor(Math.random() * 2); // 5-6
+  for (let i = 0; i < count; i++){
+    const flip = Math.random() < 0.5;
+    const ghost = document.createElement('div');
+    ghost.className = 'boo-ghost';
+    const size = 45 + Math.random() * 20;
+    ghost.style.width = size + 'px';
+    ghost.style.height = size + 'px';
+    ghost.style.left = (5 + Math.random() * 85) + '%';
+    ghost.style.animationDelay = (Math.random() * 0.6) + 's';
+    ghost.style.animationDuration = (3.4 + Math.random() * 1.2) + 's';
+    ghost.innerHTML = `<img src="Boo.png" alt="Boo" class="boo-ghost-img${flip ? ' boo-flip' : ''}">`;
+    document.body.appendChild(ghost);
+    ghost.addEventListener('animationend', () => ghost.remove());
   }
 }
 

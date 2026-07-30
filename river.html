@@ -160,6 +160,7 @@
   <div class="flush-title">FIVE OF A KIND!</div>
   <div class="flush-sub">Get it? Hehe.</div>
   <br>
+  <a href="directive.html" id="flush-prev-link" style="display:none;font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;margin-right:14px;opacity:0;animation:titleIn 0.6s ease 2.4s forwards;text-decoration:underline;">← Previous puzzle set</a>
   <a href="pit.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;opacity:0;animation:titleIn 0.6s ease 2.4s forwards;text-decoration:underline;">Next puzzle set →</a>
 </div>
 
@@ -464,8 +465,10 @@ function fillForTour(){
 }
 
 render();
-if (window.PatAchievements.isLegendAchieved() && !state.solved['flush']){
-  fillForTour();
+if (window.PatAchievements.isLegendAchieved()){
+  if (!state.solved['flush']) fillForTour();
+  const prevLink = document.getElementById('flush-prev-link');
+  if (prevLink) prevLink.style.display = 'inline-block';
 }
 </script>
 </body>

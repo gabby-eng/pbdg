@@ -465,6 +465,11 @@ function render(){
     <div class="board-wrap"><div class="board-frame"><div class="board">${boardHtml}</div>${solved ? `<div class="sparkle-overlay">${sparkleHtml()}</div>` : ''}</div></div>
     <div class="status-note">${note}</div>
     ${winHtml}
+    ${window.PatAchievements.isNewGamePlus() ? `
+      <div style="text-align:center;padding-top:14px;">
+        <button onclick="devFillSolution()" style="font-family:'Space Mono',monospace;font-size:0.75rem;background:var(--panel-alt);border:1px solid var(--gold);color:var(--gold-bright);padding:8px 16px;border-radius:999px;cursor:pointer;">Fill puzzle (New Game+)</button>
+      </div>
+    ` : ''}
     <div class="clues-section">
       <div class="clues-columns">
         <div>
@@ -477,11 +482,6 @@ function render(){
         </div>
       </div>
     </div>
-    ${window.PatAchievements.isNewGamePlus() ? `
-      <div style="text-align:center;padding-top:14px;">
-        <button onclick="devFillSolution()" style="font-family:'Space Mono',monospace;font-size:0.75rem;background:var(--panel-alt);border:1px solid var(--gold);color:var(--gold-bright);padding:8px 16px;border-radius:999px;cursor:pointer;">Fill puzzle (New Game+)</button>
-      </div>
-    ` : ''}
     <div class="dev-buttons">
       <button onclick="devFillSolution()">DEV: Fill Solution (remove before gifting)</button>
       <button onclick="devUnsolve()">DEV: Unsolve (remove before gifting)</button>

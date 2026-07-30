@@ -183,7 +183,11 @@
         color:var(--gold-bright, #FFD873);margin-bottom:12px;
         text-shadow:0 0 20px rgba(255,216,115,0.4);
       }
-      .achv-legend-body{font-size:0.85rem;color:var(--text, #F3EFE3);line-height:1.6;margin-bottom:20px;}
+      .achv-legend-body{font-size:0.85rem;color:var(--text, #F3EFE3);line-height:1.6;margin-bottom:16px;}
+      .achv-legend-stats{
+        font-size:0.72rem;color:var(--gold-bright, #FFD873);
+        letter-spacing:0.03em;margin-bottom:20px;
+      }
       .achv-legend-dismiss{
         font-family:'Space Mono',monospace;font-size:0.78rem;background:none;
         border:1px solid var(--gold, #E8B84B);color:var(--gold-bright, #FFD873);
@@ -221,10 +225,12 @@
     const overlay = document.createElement('div');
     overlay.id = 'achv-legend-overlay';
     overlay.className = 'achv-legend-overlay';
+    flushPlaytime();
     overlay.innerHTML = `
       <div class="achv-legend-modal">
         <div class="achv-legend-title">Congratulations!</div>
         <div class="achv-legend-body">You have thoroughly played this gift. You may now flip freely through all the puzzles and reminisce. I hope you had fun!</div>
+        <div class="achv-legend-stats">Total time played: ${formatPlaytime(getTotalPlaySeconds())}</div>
         <button class="achv-legend-dismiss">Close</button>
       </div>
     `;
@@ -379,9 +385,58 @@
     toggleAchievementList();
   }
 
+  const PLAYTIME_KEY = 'puzzlesForPatrick_totalPlaySeconds';
+
+  function loadTotalPlaySeconds(){
+    try {
+      const v = parseInt(localStorage.getItem(PLAYTIME_KEY), 10);
+      return isNaN(v) ? 0 : v;
+    } catch (e){ return 0; }
+  }
+
+  function saveTotalPlaySeconds(sec){
+    try { localStorage.setItem(PLAYTIME_KEY, String(sec)); } catch (e){}
+  }
+
+  let persistedPlaySeconds = loadTotalPlaySeconds();
+  let sessionPlaySeconds = 0;
+  let playtimeIntervalId = null;
+
+  function flushPlaytime(){
+    saveTotalPlaySeconds(persistedPlaySeconds + sessionPlaySeconds);
+  }
+
+  function startPlaytimeTracking(){
+    if (playtimeIntervalId) return;
+    playtimeIntervalId = setInterval(() => {
+      if (!document.hidden){
+        sessionPlaySeconds++;
+        if (sessionPlaySeconds % 5 === 0) flushPlaytime();
+      }
+    }, 1000);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) flushPlaytime();
+    });
+    window.addEventListener('pagehide', flushPlaytime);
+    window.addEventListener('beforeunload', flushPlaytime);
+  }
+
+  function getTotalPlaySeconds(){
+    return persistedPlaySeconds + sessionPlaySeconds;
+  }
+
+  function formatPlaytime(totalSeconds){
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m`;
+    return `${totalSeconds}s`;
+  }
+
   function init(){
     injectStyles();
     renderTrophyIcon();
+    startPlaytimeTracking();
   }
 
   if (document.readyState === 'loading'){
@@ -400,6 +455,8 @@
     markNewGamePlus: markNewGamePlus,
     isLegendAchieved: isLegendAchieved,
     tourNav: tourNavHtml,
+    getTotalPlaySeconds: getTotalPlaySeconds,
+    formatPlaytime: formatPlaytime,
     list: ACHIEVEMENTS
   };
 })();

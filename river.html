@@ -430,7 +430,7 @@ function wiggleJoker(img){
   void img.offsetWidth; // force reflow so the animation can retrigger
   img.classList.add('wiggling');
   jokerClickCount++;
-  if (jokerClickCount === 4){
+  if (jokerClickCount === 5){
     window.PatAchievements.unlock('boo');
     img.src = 'Joker.png';
     spawnBooGhosts();
@@ -443,7 +443,7 @@ function spawnBooGhosts(){
     const flip = Math.random() < 0.5;
     const ghost = document.createElement('div');
     ghost.className = 'boo-ghost';
-    const size = 45 + Math.random() * 20;
+    const size = 130 + Math.random() * 40;
     ghost.style.width = size + 'px';
     ghost.style.height = size + 'px';
     ghost.style.left = (5 + Math.random() * 85) + '%';

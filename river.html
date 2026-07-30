@@ -160,7 +160,7 @@
   <div class="flush-title">FIVE OF A KIND!</div>
   <div class="flush-sub">Get it? Hehe.</div>
   <br>
-  <a href="directive.html" id="flush-prev-link" style="display:none;font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;margin-right:14px;opacity:0;animation:titleIn 0.6s ease 2.4s forwards;text-decoration:underline;">← Previous puzzle set</a>
+  <a href="#" onclick="closeFlushOverlay(); return false;" id="flush-prev-link" style="display:none;font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;margin-right:14px;opacity:0;animation:titleIn 0.6s ease 2.4s forwards;text-decoration:underline;">← Previous puzzle set</a>
   <a href="pit.html" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);margin-top:14px;opacity:0;animation:titleIn 0.6s ease 2.4s forwards;text-decoration:underline;">Next puzzle set →</a>
 </div>
 
@@ -446,6 +446,10 @@ function fillForTour(){
   state.solved['flush'] = true;
   render();
   showFlushAnimation();
+}
+
+function closeFlushOverlay(){
+  document.getElementById('flush-overlay').classList.remove('active');
 }
 
 render();

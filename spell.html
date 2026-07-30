@@ -186,15 +186,10 @@ function handleNewGamePlusClick(event){
   const total = window.PatAchievements.list.length;
   const unlocked = window.PatAchievements.list.filter(a => a.unlocked).length;
   const alreadyHadHunter = window.PatAchievements.list.find(a => a.id === 'achievementhunter').unlocked;
-  if (unlocked < total){
-    window.PatAchievements.unlock('achievementhunter');
+  if (!alreadyHadHunter && unlocked < total){
+    try { localStorage.setItem('puzzlesForPatrick_pendingAchievementHunter', '1'); } catch(e){}
   }
   window.PatAchievements.markNewGamePlus();
-
-  if (!alreadyHadHunter && unlocked < total){
-    event.preventDefault();
-    setTimeout(() => { window.location.href = 'index.html'; }, 3200);
-  }
 }
 
 function isPuzzleFull(idx){
@@ -514,6 +509,7 @@ function render(){
 
   if (allDone && !spellCompleted){
     spellCompleted = true;
+    window.PatAchievements.unlock('theseareforyou');
     window.PatAchievements.unlock('tada');
     window.PatAchievements.markGameCompleted();
   }
@@ -523,7 +519,7 @@ function render(){
 
   const winHtml = allDone ? `
     <div class="win-banner">
-      <h2>❤</h2>
+      <img src="Magnolias.png" alt="Magnolias" width="150" height="150" style="display:block;margin:0 auto;image-rendering:pixelated;image-rendering:crisp-edges;">
       <div style="margin-top:16px;">
         <a href="index.html" onclick="handleNewGamePlusClick(event)" style="display:inline-block;font-family:'Space Mono',monospace;font-size:0.78rem;background:var(--panel-alt);border:1px solid var(--gold);color:var(--gold-bright);padding:10px 20px;border-radius:999px;text-decoration:none;">New Game+</a>
       </div>

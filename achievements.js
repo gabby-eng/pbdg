@@ -26,6 +26,7 @@
     { id: "handsoffecologist", title: "Hands-Off Ecologist", sub: "Let the whale shark swim freely." },
     { id: "eureka", title: "Eureka!", sub: "Make the discovery before completing the grid." },
     { id: "tada", title: "Ta-da!", sub: "Play your birthday gift from Gabby." },
+    { id: "theseareforyou", title: "These Magnolias Are For You", sub: "Complete the annual spell." },
     { id: "dontcare", title: "Don't Care. Didn't Ask.", sub: "Leave things as you find them. I guess." },
     { id: "achievementhunter", title: "Achievement Hunter", sub: "Hunt for missing achievements." },
     { id: "grubfather", title: "Grubfather", sub: "<em>Happy...happy...happy!!!</em>" },

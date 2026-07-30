@@ -103,6 +103,13 @@ const CODE = "1812";
 let digits = [0, 0, 0, 0];
 let unlocked = false;
 
+try {
+  if (localStorage.getItem('puzzlesForPatrick_pendingAchievementHunter') === '1'){
+    localStorage.removeItem('puzzlesForPatrick_pendingAchievementHunter');
+    window.PatAchievements.unlock('achievementhunter');
+  }
+} catch(e){}
+
 function render(){
   const app = document.getElementById('app');
 

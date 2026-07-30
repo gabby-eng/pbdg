@@ -512,6 +512,7 @@ function render(){
         <span class="timer-display ${timerRunning ? '' : 'paused'}" id="timer-display">${formatTime(timerSeconds)}</span>
         <button class="timer-pause-btn" id="timer-pause-btn" onclick="togglePauseTimer()" ${puzzleSolved ? 'disabled' : ''}>${timerRunning ? '⏸' : '▶'}</button>
       </div>
+      ${window.PatAchievements.tourNav('observe.html')}
       <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
         <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
@@ -672,7 +673,16 @@ function sparkleHtml(){
   ).join('');
 }
 
+function fillForTour(){
+  devFillSolution();
+  wordGuess = ANSWER_WORD.split('');
+  checkWordGuess();
+}
+
 render();
+if (window.PatAchievements.isLegendAchieved() && !wordConfirmed){
+  fillForTour();
+}
 startTimer();
 </script>
 </body>

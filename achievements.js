@@ -298,6 +298,25 @@
     toggleAchievementList();
   }
 
+  const TOUR_PAGE_ORDER = ["river.html","pit.html","numbers.html","words.html","gentle.html","loyal.html","observe.html","postletter.html","spell.html"];
+
+  function isLegendAchieved(){
+    return unlockedIds.has('legendachiever9');
+  }
+
+  function tourNavHtml(currentPage){
+    if (!isLegendAchieved()) return '';
+    const idx = TOUR_PAGE_ORDER.indexOf(currentPage);
+    if (idx === -1) return '';
+    const prev = idx > 0 ? TOUR_PAGE_ORDER[idx - 1] : null;
+    const next = idx < TOUR_PAGE_ORDER.length - 1 ? TOUR_PAGE_ORDER[idx + 1] : null;
+    const parts = [];
+    if (prev) parts.push(`<a href="${prev}" style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-decoration:underline;margin-right:14px;">← Previous puzzle</a>`);
+    if (next) parts.push(`<a href="${next}" style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--gold-bright);text-decoration:underline;">Next puzzle →</a>`);
+    if (!parts.length) return '';
+    return `<div style="margin-top:10px;">${parts.join('')}</div>`;
+  }
+
   function unlockAllAchievements(){
     ACHIEVEMENTS.forEach(a => { a.unlocked = true; unlockedIds.add(a.id); });
     saveUnlockedIds([...unlockedIds]);
@@ -326,6 +345,8 @@
     markGameCompleted: markGameCompleted,
     isNewGamePlus: isNewGamePlus,
     markNewGamePlus: markNewGamePlus,
+    isLegendAchieved: isLegendAchieved,
+    tourNav: tourNavHtml,
     list: ACHIEVEMENTS
   };
 })();

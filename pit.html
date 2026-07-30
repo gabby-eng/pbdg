@@ -302,7 +302,7 @@ function render(){
       <div class="eyebrow">Puzzles for Patrick</div>
       <h1>More Up!</h1>
       <div class="sub">Do you know where this is heading?</div>
-      <a href="river.html" style="display:inline-block;margin-top:10px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-decoration:underline;">← Previous puzzle set</a>
+      ${window.PatAchievements.tourNav('pit.html')}
       <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
         <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
@@ -558,7 +558,19 @@ function handleNextPuzzleClick(event){
   return true;
 }
 
+function fillForTour(){
+  CLUES.forEach(c => { state.solved[c.id] = true; });
+  state.rearrangeStage = true;
+  state.fadedOut = true;
+  state.pantheonOrder = PANTHEON_ORDER.slice();
+  state.pantheonWin = true;
+  render();
+}
+
 render();
+if (window.PatAchievements.isLegendAchieved() && !state.pantheonWin){
+  fillForTour();
+}
 </script>
 </body>
 </html>

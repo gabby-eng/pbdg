@@ -282,6 +282,7 @@ function render(){
       <div class="eyebrow">Puzzles for Patrick</div>
       <h1>Warm Up</h1>
       <div class="sub">You know what to do.</div>
+      ${window.PatAchievements.tourNav('river.html')}
       <div style="margin:14px auto 0;max-width:360px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;">
         <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Dev nav — jump to any page</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
@@ -455,7 +456,17 @@ function spawnBooGhosts(){
   }
 }
 
+function fillForTour(){
+  CLUES.forEach(c => { state.solved[c.id] = true; });
+  state.solved['flush'] = true;
+  render();
+  showFlushAnimation();
+}
+
 render();
+if (window.PatAchievements.isLegendAchieved() && !state.solved['flush']){
+  fillForTour();
+}
 </script>
 </body>
 </html>
